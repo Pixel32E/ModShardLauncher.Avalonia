@@ -22,11 +22,20 @@ public sealed class PatchRunner
     /// <summary>Patches the loaded data. Returns null on success, or a diagnostic describing the failing mod.</summary>
     public PatchDiagnostic? Patch(IReadOnlyList<ModFile> mods)
     {
+        int enabledCount = mods.Count(m => m.Enabled);
+        Log.Information("Patching {Enabled} enabled mod(s)...", enabledCount);
+        if (enabledCount == 0)
+        {
+            Log.Warning("No mod is enabled; the output will only contain the base patches.");
+        }
+
+        System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
             GameLogInjection.InjectLog();
             ApplyMods(mods);
             LootTableRegistry.InjectLootScripts();
+            Log.Information("Patch pipeline completed in {Elapsed} ms", stopwatch.ElapsedMilliseconds);
             return null;
         }
         catch (Exception ex)
@@ -62,6 +71,7 @@ public sealed class PatchRunner
 
             _settings?.EnabledMods.Add(mod.Name);
             mod.PatchStatus = PatchStatus.Patching;
+            Log.Information("Applying mod {Name} {Version}", mod.Name, mod.Version);
 
             if (mod.Version != AppInfo.MslVersion)
             {
@@ -72,9 +82,11 @@ public sealed class PatchRunner
             _textureInjector.Inject(mod);
             mod.instance?.PatchMod();
             mod.PatchStatus = PatchStatus.Success;
+            Log.Information("Mod {Name} patched", mod.Name);
             LogModStatus(mod);
         }
 
+        Log.Information("Creating disclaimer rooms and the in-game mod menu");
         Msl.AddDisclaimerRoom(
             MslContext.Credits.Select(x => x.Item1).ToArray(),
             MslContext.Credits.SelectMany(x => x.Item2).Distinct().ToArray());

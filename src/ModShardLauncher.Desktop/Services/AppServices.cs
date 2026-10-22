@@ -62,7 +62,11 @@ public sealed class AppServices
             .WriteTo.Sink(logSink)
             .CreateLogger();
 
-        LocalizationService.Instance.SetLanguage(LocalizationService.CultureFor(settings.Language));
+        string culture = settings.LanguageChosen
+            ? LocalizationService.CultureFor(settings.Language)
+            : LocalizationService.DetectSystemCulture();
+        LocalizationService.Instance.SetLanguage(culture);
+        Log.Information("Using UI culture {Culture} (language setting: {Language})", culture, settings.Language);
 
         AppServices services = new(
             settings,
@@ -77,6 +81,8 @@ public sealed class AppServices
         services.ApplyLogLevel();
         services.Catalog.Reload();
         services.Catalog.ApplyEnabledMods(settings.EnabledMods);
+        Log.Information("Loaded {Mods} mod(s) and {Sources} mod source(s)",
+            services.Catalog.Mods.Count, services.Catalog.ModSources.Count);
 
         Log.Information("Launching msl {{{0}}} using UTMT {{{1}}}", AppInfo.MslVersion, AppInfo.UtmtLibVersion);
         foreach (string error in services.Catalog.LoadErrors)
@@ -90,7 +96,9 @@ public sealed class AppServices
 
     public void ApplyLogLevel()
     {
-        LogSink.SetMinimumLevel(Settings.EnableLogger ? LogEventLevel.Information : LogEventLevel.Warning);
+        // Patching details are Information level and must always reach the log panel; the
+        // setting only controls whether debug noise is shown.
+        LogSink.SetMinimumLevel(Settings.EnableLogger ? LogEventLevel.Debug : LogEventLevel.Information);
     }
 
     public void SaveSettings()

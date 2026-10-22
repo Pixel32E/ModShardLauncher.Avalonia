@@ -20,6 +20,7 @@
               </DataTemplate>
             </ComboBox.ItemTemplate>
           </ComboBox>
+          <TextBlock Text="{Binding LanguageHint}" Classes="caption" />
         </StackPanel>
       </Border>
 

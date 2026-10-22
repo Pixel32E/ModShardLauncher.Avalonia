@@ -93,11 +93,9 @@
 
         <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
 
-        <Grid Grid.Column="2" RowDefinitions="*,Auto,Auto">
+        <Grid Grid.Column="2" RowDefinitions="*,Auto">
           <ContentControl Grid.Row="0" Content="{Binding CurrentPage}" Margin="18" />
-          <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch"
-                        ResizeDirection="Rows" IsVisible="{Binding IsLogVisible}" />
-          <views:LogPanel Grid.Row="2" Height="196" IsVisible="{Binding IsLogVisible}" />
+          <views:LogPanel Grid.Row="1" Height="200" IsVisible="{Binding IsLogVisible}" />
         </Grid>
       </Grid>
 

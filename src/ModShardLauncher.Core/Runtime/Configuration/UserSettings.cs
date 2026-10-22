@@ -8,8 +8,14 @@ namespace ModShardLauncher;
 /// </summary>
 public class UserSettings
 {
-    public string Language = "English";
+    /// <summary>Language name, or "auto" to follow the Windows display language.</summary>
+    public string Language = "auto";
+
+    /// <summary>True once the user picked a language; legacy settings default to automatic detection.</summary>
+    public bool LanguageChosen = false;
+
     public bool EnableLogger = true;
+
     public List<string> EnabledMods = new();
 }
 

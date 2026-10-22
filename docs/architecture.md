@@ -166,9 +166,9 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
 
 | 方面 | WPF | Avalonia |
 |---|---|---|
-| 语言切换 | 三个 `ResourceDictionary` 同时 merge，靠移除/追加排序 | 单一 resx + satellite，`LocalizedText` 通知刷新 |
-| 加载/保存提示 | 独立模态 `LoadingDialog` + `ShowDialog()` | 主窗口内进度覆盖层 + `async` |
-| 日志 | 隐藏控制台窗口 | 底部日志面板 + 文件日志 |
+| 语言切换 | 三个 `ResourceDictionary` 同时 merge，靠移除/追加排序 | 单一 resx + satellite，`LocalizedText` 通知刷新；默认按 Windows 显示语言自动选择 |
+| 加载/保存提示 | 独立模态 `LoadingDialog` + `ShowDialog()` | 主窗口内进度覆盖层 + `async`，补丁在后台线程执行以便日志实时刷新 |
+| 日志 | 隐藏控制台窗口 | 底部固定高度日志面板（不可调整）+ 文件日志；信息级日志始终记录 |
 | 错误对话框 | WinForms `Form` + RTF | Avalonia `ErrorDialog` + 可选中文本 |
 | 文件选择 | `Microsoft.Win32` 同步对话框 | `StorageProvider` 异步 |
 | 图片 | `System.Drawing` 图集 + `GetPixel` | SkiaSharp 图集 + 像素读取 |

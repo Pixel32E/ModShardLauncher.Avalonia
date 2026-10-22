@@ -42,7 +42,7 @@ UndertaleModTool {1}
   <data name="StatusSaved" xml:space="preserve"><value>已保存 {0}</value></data>
   <data name="MenuShowMods" xml:space="preserve"><value>模组列表</value></data>
   <data name="SettingsSourcesFolder" xml:space="preserve"><value>模组源码</value></data>
-  <data name="SettingsLoggerHint" xml:space="preserve"><value>关闭后日志面板只显示警告和错误；日志文件始终写入。</value></data>
+  <data name="SettingsLoggerHint" xml:space="preserve"><value>开启后显示调试级日志；信息级日志（包括完整打补丁过程）始终记录。</value></data>
   <data name="ModsTitle" xml:space="preserve"><value>模组</value></data>
   <data name="LoadDataWarning" xml:space="preserve"><value>请先加载游戏数据文件！</value></data>
   <data name="HomeStatsEnabledValue" xml:space="preserve"><value>已启用 {0} 个</value></data>
@@ -105,4 +105,6 @@ UndertaleModTool {1}
   <data name="ModsEmpty" xml:space="preserve"><value>未找到模组</value></data>
   <data name="MenuOpenModsFolder" xml:space="preserve"><value>打开模组文件夹</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>设置</value></data>
+  <data name="SettingsLanguageHint" xml:space="preserve"><value>自动跟随 Windows 显示语言；没有对应本地化时回退到英文。</value></data>
+  <data name="SaveOverwriteSourceError" xml:space="preserve"><value>请选择其他输出文件：不允许覆盖已加载的原版 data.win。</value></data>
 </root>

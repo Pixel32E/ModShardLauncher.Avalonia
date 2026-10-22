@@ -42,7 +42,7 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="StatusSaved" xml:space="preserve"><value>Saved {0}</value></data>
   <data name="MenuShowMods" xml:space="preserve"><value>Mod list</value></data>
   <data name="SettingsSourcesFolder" xml:space="preserve"><value>Mod sources</value></data>
-  <data name="SettingsLoggerHint" xml:space="preserve"><value>When disabled only warnings and errors are shown in the log panel. The log file is always written.</value></data>
+  <data name="SettingsLoggerHint" xml:space="preserve"><value>Shows debug-level messages when enabled. Informational logs, including the whole patching process, are always recorded.</value></data>
   <data name="ModsTitle" xml:space="preserve"><value>Mods</value></data>
   <data name="LoadDataWarning" xml:space="preserve"><value>Please load a game data file first!</value></data>
   <data name="HomeStatsEnabledValue" xml:space="preserve"><value>{0} enabled</value></data>
@@ -105,4 +105,6 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="ModsEmpty" xml:space="preserve"><value>No mods found</value></data>
   <data name="MenuOpenModsFolder" xml:space="preserve"><value>Open Mods folder</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="SettingsLanguageHint" xml:space="preserve"><value>Auto follows the Windows display language; languages without a translation fall back to English.</value></data>
+  <data name="SaveOverwriteSourceError" xml:space="preserve"><value>Choose a different output file: overwriting the loaded vanilla data.win is not allowed.</value></data>
 </root>

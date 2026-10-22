@@ -10,8 +10,8 @@
 - 打开数据文件时，选择器默认定位到 Steam 安装目录 `C:\Program Files (x86)\Steam\steamapps\common\Stoneshard`；该目录不存在时回退到当前工作目录。
 - 在 `ModSources/` 中编译 C# 模组工程为 `.sml`（运行时 Roslyn，保留原有流程）。
 - 完整保留 `Msl` modding API（命名空间、类型、方法签名不变）；程序集版本固定为 `1.0.0.0`，旧 `.sml` 通过独立 `AssemblyLoadContext` 按简单名绑定宿主 API，无需重新编译。
-- 现代 IDE 风格界面：顶部菜单 + 工具栏 + 左侧导航 + 底部实时日志 + 状态栏。
-- 中 / 英 / 俄三语，采用标准 `.resx` + satellite assemblies，可在运行时切换。
+- 现代 IDE 风格界面：顶部菜单 + 工具栏 + 左侧导航 + 底部固定高度日志面板（实时显示补丁过程，不可拖拽调整）+ 状态栏。
+- 中 / 英 / 俄三语，采用标准 `.resx` + satellite assemblies；默认跟随 Windows 显示语言，没有对应翻译时回退英文，可在设置中固定语言。
 - 无头 CLI：批量打补丁、列出模组、编译模组、导出数据，便于 CI 和服务器使用。
 
 ## 解决方案结构

@@ -63,19 +63,41 @@ public sealed class DialogService
         return null;
     }
 
-    public async Task<string?> PickSaveDataFileAsync()
+    /// <summary>
+    /// Asks where to write the patched file. The suggestion never reuses the source file name,
+    /// so pressing Enter by accident cannot overwrite the vanilla data.win.
+    /// </summary>
+    public async Task<string?> PickSaveDataFileAsync(string? sourceFilePath)
     {
         if (_owner is null)
         {
             return null;
         }
 
+        string suggestedName = "data_patched.win";
+        IStorageFolder? startLocation = null;
+        if (!string.IsNullOrWhiteSpace(sourceFilePath))
+        {
+            string? directory = Path.GetDirectoryName(sourceFilePath);
+            if (directory is not null)
+            {
+                startLocation = await _owner.StorageProvider.TryGetFolderFromPathAsync(directory);
+            }
+
+            string name = Path.GetFileNameWithoutExtension(sourceFilePath);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                suggestedName = name + "_patched.win";
+            }
+        }
+
         IStorageFile? file = await _owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = LocalizationService.Instance["MenuSaveAs"],
-            SuggestedFileName = "data.win",
+            SuggestedFileName = suggestedName,
             DefaultExtension = "win",
             ShowOverwritePrompt = true,
+            SuggestedStartLocation = startLocation,
             FileTypeChoices = DataFileTypes,
         });
 

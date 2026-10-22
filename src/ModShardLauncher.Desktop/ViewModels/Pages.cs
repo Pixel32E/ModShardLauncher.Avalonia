@@ -157,12 +157,14 @@ public sealed partial class SettingsViewModel : ObservableObject
         _main = main;
         Languages =
         [
+            new LanguageOption("Auto", "auto", "auto"),
             new LanguageOption("English", "en", "English"),
             new LanguageOption("中文", "zh-Hans", "Chinese"),
             new LanguageOption("Русский", "ru", "Russian"),
         ];
-        _selectedLanguage = Languages.FirstOrDefault(x => x.Culture == LocalizationService.Instance.Culture.Name)
-            ?? Languages[0];
+        _selectedLanguage = main.Settings.LanguageChosen
+            ? Languages.FirstOrDefault(x => x.Culture == LocalizationService.Instance.Culture.Name) ?? Languages[1]
+            : Languages[0];
         _enableLogger = main.Settings.EnableLogger;
     }
 
@@ -178,6 +180,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public string SettingsTitle => LocalizationService.Instance["SettingsTitle"];
     public string LanguageLabel => LocalizationService.Instance["SettingsLanguage"];
+    public string LanguageHint => LocalizationService.Instance["SettingsLanguageHint"];
     public string LoggerLabel => LocalizationService.Instance["SettingsLogger"];
     public string LoggerHint => LocalizationService.Instance["SettingsLoggerHint"];
     public string FoldersLabel => LocalizationService.Instance["SettingsPaths"];
@@ -194,8 +197,19 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnSelectedLanguageChanged(LanguageOption value)
     {
-        LocalizationService.Instance.SetLanguage(value.Culture);
-        _main.Settings.Language = value.SettingName;
+        if (value.Culture == "auto")
+        {
+            _main.Settings.Language = "auto";
+            _main.Settings.LanguageChosen = false;
+            LocalizationService.Instance.SetLanguage(LocalizationService.DetectSystemCulture());
+        }
+        else
+        {
+            _main.Settings.Language = value.SettingName;
+            _main.Settings.LanguageChosen = true;
+            LocalizationService.Instance.SetLanguage(value.Culture);
+        }
+
         _main.SaveSettings();
     }
 
@@ -222,6 +236,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(SettingsTitle));
         OnPropertyChanged(nameof(LanguageLabel));
+        OnPropertyChanged(nameof(LanguageHint));
         OnPropertyChanged(nameof(LoggerLabel));
         OnPropertyChanged(nameof(LoggerHint));
         OnPropertyChanged(nameof(FoldersLabel));

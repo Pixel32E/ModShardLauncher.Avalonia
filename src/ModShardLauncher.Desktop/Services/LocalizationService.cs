@@ -106,6 +106,37 @@ public sealed class LocalizationService
         "Russian" or "Русский" or "ru" => "ru",
         _ => "en",
     };
+
+    /// <summary>
+    /// Picks a supported resource culture from the Windows display language.
+    /// Only English, Simplified Chinese and Russian resources exist; anything else falls back
+    /// to English.
+    /// </summary>
+    public static string DetectSystemCulture()
+    {
+        for (CultureInfo? culture = CultureInfo.CurrentUICulture;
+             culture is not null && !string.IsNullOrEmpty(culture.Name);
+             culture = culture.Parent)
+        {
+            string name = culture.Name.ToLowerInvariant();
+            if (name.StartsWith("zh", StringComparison.Ordinal))
+            {
+                return "zh-Hans";
+            }
+
+            if (name.StartsWith("ru", StringComparison.Ordinal))
+            {
+                return "ru";
+            }
+
+            if (name.StartsWith("en", StringComparison.Ordinal))
+            {
+                return "en";
+            }
+        }
+
+        return "en";
+    }
 }
 
 /// <summary>XAML sugar: <c>Text="{loc:Tr AppTitle}"</c>.</summary>

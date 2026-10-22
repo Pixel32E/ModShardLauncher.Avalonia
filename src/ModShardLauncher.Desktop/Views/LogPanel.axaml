@@ -16,7 +16,7 @@
 
       <ListBox Grid.Row="1" Name="LogList" ItemsSource="{Binding LogEntries}"
                Background="Transparent" Margin="8,0,8,8"
-               ScrollViewer.HorizontalScrollBarVisibility="Auto">
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
         <ListBox.ItemTemplate>
           <DataTemplate>
             <Grid ColumnDefinitions="66,44,*">
@@ -24,7 +24,7 @@
               <TextBlock Grid.Column="1" Text="{Binding LevelText}" Foreground="{Binding LevelBrush}"
                          Classes="caption" FontFamily="Consolas" />
               <TextBlock Grid.Column="2" Text="{Binding Message}" Classes="caption"
-                         Foreground="{DynamicResource TextSecondary}" />
+                         Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" />
             </Grid>
           </DataTemplate>
         </ListBox.ItemTemplate>

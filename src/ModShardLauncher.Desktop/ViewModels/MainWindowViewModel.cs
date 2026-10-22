@@ -190,10 +190,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         await RunBusyAsync("StatusPatching", async () =>
         {
+            Log.Information("Patching {Count} enabled mod(s)", _services.Catalog.Mods.Count(m => m.Enabled));
+
             PatchDiagnostic? diagnostic;
             try
             {
-                diagnostic = _services.Patcher.Patch(_services.Catalog.Mods);
+                // Keep the UI thread free so the log panel streams the patch progress.
+                diagnostic = await Task.Run(() => _services.Patcher.Patch(_services.Catalog.Mods));
             }
             catch (Exception ex)
             {
@@ -210,17 +213,31 @@ public sealed partial class MainWindowViewModel : ObservableObject
             if (diagnostic is null)
             {
                 Log.Information("Successfully patch vanilla");
-                string? destination = await _services.Dialogs.PickSaveDataFileAsync();
+                string? destination = await _services.Dialogs.PickSaveDataFileAsync(_services.GameData.DataPath);
                 if (destination is not null)
                 {
-                    await _services.GameData.SaveAsync(destination);
-                    string? directory = Path.GetDirectoryName(destination);
-                    if (directory is not null)
+                    if (IsSameFile(destination, _services.GameData.DataPath))
                     {
-                        LootTableRegistry.SaveLootTables(directory);
+                        // Never overwrite the vanilla file that is currently loaded; the user
+                        // still needs it for the next patch run.
+                        Log.Warning("Refusing to overwrite the source data file {Path}", destination);
+                        await _services.Dialogs.ShowErrorAsync(
+                            LocalizationService.Instance["DialogErrorTitle"],
+                            LocalizationService.Instance["SaveOverwriteSourceError"]);
+                        SetStatus("StatusReady");
                     }
+                    else
+                    {
+                        Log.Information("Saving patched data to {Path}", destination);
+                        await _services.GameData.SaveAsync(destination);
+                        string? directory = Path.GetDirectoryName(destination);
+                        if (directory is not null)
+                        {
+                            LootTableRegistry.SaveLootTables(directory);
+                        }
 
-                    SetStatus("StatusSaved", Path.GetFileName(destination));
+                        SetStatus("StatusSaved", Path.GetFileName(destination));
+                    }
                 }
                 else
                 {
@@ -325,6 +342,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public void OpenFolder(string path) => _services.Dialogs.OpenFolder(path);
 
+    private static bool IsSameFile(string left, string right) =>
+        string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+
     public void SaveSettings() => _services.SaveSettings();
 
     public void OnLanguageChanged()
@@ -349,6 +369,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private async Task ReloadCatalogCoreAsync()
     {
         _services.Catalog.Reload();
+        Log.Information("Loaded {Mods} mod(s) and {Sources} mod source(s)",
+            _services.Catalog.Mods.Count, _services.Catalog.ModSources.Count);
         await Mods.SyncAsync();
         await Sources.SyncAsync();
         OnPropertyChanged(nameof(HasData));
