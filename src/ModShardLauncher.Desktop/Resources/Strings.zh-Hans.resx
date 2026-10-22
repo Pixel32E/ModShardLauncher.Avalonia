@@ -70,7 +70,6 @@ UndertaleModTool {1}
   <data name="SourcesSubtitle" xml:space="preserve"><value>ModSources 文件夹中的 C# 工程，可编译为 .sml。</value></data>
   <data name="MenuScriptConsole" xml:space="preserve"><value>脚本控制台</value></data>
   <data name="SourcesOpenFolder" xml:space="preserve"><value>打开文件夹</value></data>
-  <data name="NavSettings" xml:space="preserve"><value>设置</value></data>
   <data name="MenuSaveAs" xml:space="preserve"><value>打补丁并另存为…</value></data>
   <data name="HomeNoData" xml:space="preserve"><value>未加载数据文件</value></data>
   <data name="NavSources" xml:space="preserve"><value>模组源码</value></data>

@@ -36,7 +36,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
             new NavItem(LocalizationService.Instance.Text("NavHome")),
             new NavItem(LocalizationService.Instance.Text("NavMods")),
             new NavItem(LocalizationService.Instance.Text("NavSources")),
-            new NavItem(LocalizationService.Instance.Text("NavSettings")),
         ];
 
         foreach (LogEntry entry in services.LogSink.History)
@@ -118,13 +117,22 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public string DataHeaderText => LocalizationService.Instance["StatusBarData"];
 
-    partial void OnSelectedNavIndexChanged(int value) => CurrentPage = value switch
+    partial void OnSelectedNavIndexChanged(int value)
     {
-        1 => Mods,
-        2 => Sources,
-        3 => SettingsPage,
-        _ => Home,
-    };
+        // -1 means the page was changed from outside the sidebar (Settings is only in the menu).
+        switch (value)
+        {
+            case 0:
+                CurrentPage = Home;
+                break;
+            case 1:
+                CurrentPage = Mods;
+                break;
+            case 2:
+                CurrentPage = Sources;
+                break;
+        }
+    }
 
     // ----- navigation -------------------------------------------------------
 
@@ -138,7 +146,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void ShowSources() => SelectedNavIndex = 2;
 
     [RelayCommand]
-    private void ShowSettings() => SelectedNavIndex = 3;
+    private void ShowSettings()
+    {
+        // Settings lives in the top menu only, so clear the sidebar selection first.
+        SelectedNavIndex = -1;
+        CurrentPage = SettingsPage;
+    }
 
     [RelayCommand]
     private void ToggleLog() => IsLogVisible = !IsLogVisible;

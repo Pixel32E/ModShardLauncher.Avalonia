@@ -70,7 +70,6 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="SourcesSubtitle" xml:space="preserve"><value>C# projects found in the ModSources folder. Compile them into .sml packages.</value></data>
   <data name="MenuScriptConsole" xml:space="preserve"><value>Script console</value></data>
   <data name="SourcesOpenFolder" xml:space="preserve"><value>Open folder</value></data>
-  <data name="NavSettings" xml:space="preserve"><value>Settings</value></data>
   <data name="MenuSaveAs" xml:space="preserve"><value>Patch and Save As…</value></data>
   <data name="HomeNoData" xml:space="preserve"><value>No data file loaded</value></data>
   <data name="NavSources" xml:space="preserve"><value>Mod Sources</value></data>

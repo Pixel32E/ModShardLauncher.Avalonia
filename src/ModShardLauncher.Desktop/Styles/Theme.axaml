@@ -171,8 +171,9 @@
   </Style>
 
   <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
   </Style>
+
 
   <Style Selector="TextBox">
     <Setter Property="Background" Value="{DynamicResource SurfaceAlt}" />

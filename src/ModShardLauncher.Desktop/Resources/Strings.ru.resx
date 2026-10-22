@@ -70,7 +70,6 @@ UndertaleModTool {1}
   <data name="SourcesSubtitle" xml:space="preserve"><value>C# проекты из папки ModSources. Компилируются в .sml.</value></data>
   <data name="MenuScriptConsole" xml:space="preserve"><value>Консоль скриптов</value></data>
   <data name="SourcesOpenFolder" xml:space="preserve"><value>Открыть папку</value></data>
-  <data name="NavSettings" xml:space="preserve"><value>Настройки</value></data>
   <data name="MenuSaveAs" xml:space="preserve"><value>Патч и сохранить как…</value></data>
   <data name="HomeNoData" xml:space="preserve"><value>Файл данных не загружен</value></data>
   <data name="NavSources" xml:space="preserve"><value>Исходники</value></data>
