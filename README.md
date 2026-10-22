@@ -76,6 +76,22 @@ dotnet publish src/ModShardLauncher.CLI/ModShardLauncher.CLI.csproj `
 - 运行时编译还依赖发布根目录下的 `netstandard.dll`、`System.Collections.dll`、`System.Runtime.dll`、`System.Linq.dll`、`System.ObjectModel.dll`（由 Core 的 `ModReference` 复制）。
 - 因此请勿使用 `PublishSingleFile` / `PublishTrimmed`。
 
+## 安装包（NSIS）
+
+前置：安装 [NSIS](https://nsis.sourceforge.io/) 3.x（`winget install NSIS.NSIS`）。
+
+```powershell
+# 自动执行 publish.ps1，再调用 makensis
+.\scripts\build-installer.ps1
+```
+
+- 产物：`artifacts\ModShardLauncher-Setup-<version>.exe`（当前约 38 MB，LZMA 固实压缩）；
+- 默认安装到 `%LOCALAPPDATA%\Programs\ModShardLauncher`：按用户安装、无需管理员，安装目录可写，保持便携语义；
+- 安装/卸载界面支持中文、英文、俄文；
+- 安装前读取注册表检测旧版本，调用旧 `uninstall.exe /S` 并等待完成；
+- 静默安装：`ModShardLauncher-Setup-x.y.z.exe /S /D=C:\path`（`/D` 必须是最后一个参数）；
+- 静默卸载：`uninstall.exe /S`，默认保留 `Mods`、`ModSources`、`logs`、`Settings.json`；交互式卸载会询问是否保留；
+- 卸载会结束 GUI/CLI 进程，删除程序文件、注册表项、开始菜单/桌面快捷方式，并清理可能存在的服务与防火墙规则。
 ## CLI
 
 ```text

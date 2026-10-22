@@ -48,9 +48,24 @@ jobs:
           dotnet publish src/ModShardLauncher.CLI/ModShardLauncher.CLI.csproj
           -c Release -r win-x64 --self-contained true -o artifacts/app
 
-      - name: Upload artifact
+      - name: Install NSIS
+        run: choco install nsis -y --no-progress
+
+      - name: Build installer
+        run: >
+          .\scripts\build-installer.ps1 -SkipPublish -PublishDir artifacts/app
+          -Output artifacts/ModShardLauncher-Setup-${{ github.ref_name }}.exe
+
+      - name: Upload app artifact
         uses: actions/upload-artifact@v4
         with:
           name: ModShardLauncher-${{ github.ref_name }}-win-x64
           path: artifacts/app
+          if-no-files-found: error
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ModShardLauncher-Setup-${{ github.ref_name }}
+          path: artifacts/ModShardLauncher-Setup-${{ github.ref_name }}.exe
           if-no-files-found: error
