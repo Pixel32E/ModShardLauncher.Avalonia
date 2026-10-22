@@ -8,10 +8,10 @@ namespace ModShardLauncher;
 /// </summary>
 public sealed class PatchDiagnostic
 {
-    public PatchDiagnostic(Exception exception, ModFile modFile)
+    public PatchDiagnostic(Exception exception, ModFile? modFile)
     {
         Exception = exception;
-        ModName = modFile.Name;
+        ModName = modFile?.Name ?? "(unknown mod)";
 
         if (exception.Data.Contains("fileName"))
         {

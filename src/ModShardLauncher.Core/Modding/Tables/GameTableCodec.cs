@@ -16,8 +16,9 @@ public static class GameTableCodec
     /// <summary>Loads the two tables that are commonly queried by the API (weapons / equipment).</summary>
     public static void Initialize()
     {
-        MslContext.Weapons = Msl.ThrowIfNull(GetTable("gml_GlobalScript_table_weapons"));
-        MslContext.WeaponDescriptions = Msl.ThrowIfNull(GetTable("gml_GlobalScript_table_equipment"));
+        // Storage lives on the legacy ModLoader fields so old mods observe the same lists.
+        ModLoader.Weapons = Msl.ThrowIfNull(GetTable("gml_GlobalScript_table_weapons"));
+        ModLoader.WeaponDescriptions = Msl.ThrowIfNull(GetTable("gml_GlobalScript_table_equipment"));
     }
 
     /// <summary>Returns the table stored in the script <paramref name="name"/>, or null when it does not exist.</summary>

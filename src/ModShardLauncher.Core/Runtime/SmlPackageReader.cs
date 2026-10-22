@@ -75,7 +75,7 @@ public static class SmlPackageReader
         }
 
         int assemblyLength = BitConverter.ToInt32(ReadBytes(stream, 4), 0);
-        file.Assembly = Assembly.Load(ReadBytes(stream, assemblyLength));
+        file.Assembly = ModAssemblyLoadContext.Instance.LoadMod(ReadBytes(stream, assemblyLength));
         file.Path = path;
 
         try

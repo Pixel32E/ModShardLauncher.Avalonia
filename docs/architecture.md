@@ -149,6 +149,19 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
 | 7 | `Settings.json` 字段名不变 | `Language` / `EnableLogger` / `EnabledMods` |
 | 8 | 内嵌 GML 资源名不变 | `o_msl_*` / `scr_msl_*` |
 
+### 7.1 旧模组二进制兼容层
+
+已发布的 `.sml` 内部是编译好的程序集，直接按名字引用宿主。加载器为此保留了三层兼容：
+
+| 兼容点 | 实现 |
+|---|---|
+| 程序集身份 | Core 的 `AssemblyVersion` 固定为 `1.0.0.0`（旧 WPF 版只设置 `FileVersion`，程序集版本默认就是 1.0.0.0） |
+| 依赖解析 | `ModAssemblyLoadContext.LoadMod(byte[])`：任何 `ModShardLauncher` 请求都绑定到已加载的宿主程序集；其余依赖从默认上下文或应用目录解析 |
+| 静态字段 | `DataLoader.data`、`ModLoader.Weapons/WeaponDescriptions/ScriptCallbacks` 保持为 `public static` **字段**（改成属性会破坏已编译的 `ldsfld`），并与 `MslContext` 共享同一实例 |
+| 静态方法 | `ModLoader.GetTable/SetTable/Initalize/AddMenu`、`DataLoader.Reset/LogUTMT*` 转发到新实现；仅宿主可执行的入口（`LoadFile`/`SaveFile`）抛出明确异常 |
+| WPF 依赖 | 移除对 `UndertaleModTool.LayerZIndexConverter` 的调用（它实现 `IMultiValueConverter`，类型加载需要 `PresentationFramework`）；改用 `UndertaleModLib` 的 `UpdateZIndex` |
+
+回归测试：`LegacyCompatibilityTests` 锁定程序集身份、字段/方法存在性与 `MslContext` 别名关系；`ModAssemblyLoadingTests` 用 Roslyn 现场编译一个 `Mod` 子类，经 `ModAssemblyLoadContext` 加载并检查基类身份。
 ## 8. 与 WPF 版本的行为差异
 
 | 方面 | WPF | Avalonia |

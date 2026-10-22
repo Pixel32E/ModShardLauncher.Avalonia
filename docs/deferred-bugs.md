@@ -5,7 +5,7 @@
 | 编号 | 位置（新代码） | 问题 | 当前状态 |
 |---|---|---|---|
 | B1 | `GameDataService.LoadAsync` + `MainWindowViewModel.RunBusyAsync` | 旧版：加载失败时 `LoadingDialog.Hide()` 不执行、`ShowDialog()` 永久阻塞。 | **架构层面已消失**：不再有嵌套模态循环，失败会 `Reset()` 并弹出错误对话框。未做额外的业务逻辑修改。 |
-| B2 | `PatchRunner.Patch` → `GetFailingMod` | 失败发生在日志注入阶段（尚无模组被标记 `Patching`）时，`First()` 会抛 `InvalidOperationException`，掩盖原始异常。 | **原样保留**；UI 层会捕获并显示二次异常。 |
+| B2 | `PatchRunner.Patch` → `GetFailingMod` | 失败发生在日志注入或收尾阶段（尚无模组被标记 `Patching`）时，`First()` 会抛 `InvalidOperationException`，掩盖原始异常。 | **已修复**：改为 `FirstOrDefault`，`PatchDiagnostic` 接受可空模组名（`(unknown mod)`）。首次端到端测试时该缺陷掩盖了真实的 `PresentationFramework` 错误，故提前修复。 |
 | B3 | `ModFile.GetFile`、`TextureSourceScanner`、`SmlPackageReader` | `.sml` 内部路径使用 `\` 分隔，在非 Windows 上会失效。 | **Windows-only 目标下不构成问题**，未修改格式。 |
 | B4 | `ModInterfaceServer.AcceptCallback` | `while (Client.Connected) if (Available == 0) continue;` 忙等，占满一个核心。 | **原样保留**，代码中有 `TODO` 注释指向本条。 |
 | B5 | `PatchRunner.ApplyMods` | 每次打补丁都向 `Main.Settings.EnabledMods` 追加模组名，从不去重。 | **原样保留**。 |

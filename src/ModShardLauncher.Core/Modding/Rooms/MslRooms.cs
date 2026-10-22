@@ -1,4 +1,3 @@
-using UndertaleModTool;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -852,7 +851,8 @@ namespace ModShardLauncher
 
             if (room.Layers.Count > 1)
             {
-                LayerZIndexConverter.ProcessOnce = true;
+                // UndertaleModTool's LayerZIndexConverter is a WPF type used only by its room editor.
+                // The Avalonia build recomputes the z-indices directly with the lib-only API.
                 foreach (UndertaleRoom.Layer l in room.Layers)
                     l.UpdateZIndex();
             }

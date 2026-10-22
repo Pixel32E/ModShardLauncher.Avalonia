@@ -31,17 +31,17 @@ public sealed class PatchRunner
         }
         catch (Exception ex)
         {
-            // Kept intentionally identical to the legacy behaviour: the diagnostic needs the mod
-            // that was being patched, which is resolved with First() (see analysis B2, deferred).
+            // Failures after the per-mod loop (credits room, menus, loot scripts) have no mod in
+            // the Patching state; fall back to a mod-less diagnostic instead of masking the error.
             PatchDiagnostic diagnostic = new(ex, GetFailingMod(mods));
             diagnostic.ToLog();
             return diagnostic;
         }
     }
 
-    /// <summary>The mod that was being patched when the pipeline failed.</summary>
-    public static ModFile GetFailingMod(IReadOnlyList<ModFile> mods) =>
-        mods.Where(x => x.Enabled).First(x => x.PatchStatus == PatchStatus.Patching);
+    /// <summary>The mod that was being patched when the pipeline failed, if any.</summary>
+    public static ModFile? GetFailingMod(IReadOnlyList<ModFile> mods) =>
+        mods.Where(x => x.Enabled).FirstOrDefault(x => x.PatchStatus == PatchStatus.Patching);
 
     private void ApplyMods(IReadOnlyList<ModFile> mods)
     {

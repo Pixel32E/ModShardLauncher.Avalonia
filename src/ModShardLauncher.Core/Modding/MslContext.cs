@@ -8,38 +8,61 @@ namespace ModShardLauncher;
 /// Ambient state shared by the static <see cref="Msl"/> API.
 /// <para>
 /// Historically every helper reached into <c>ModLoader.Data</c> / <c>Main.Instance</c>.
-/// The host (<c>GameDataService</c> / <c>PatchRunner</c>) now owns the lifetime and attaches the
-/// game data here before any mod code runs, which keeps the public API static (mod compatibility)
-/// while making the state explicit and testable.
+/// The host (<see cref="GameDataService"/> / <see cref="PatchRunner"/>) now owns the lifetime and
+/// attaches the game data here before any mod code runs, which keeps the public API static
+/// (mod compatibility) while making the state explicit and testable.
+/// </para>
+/// <para>
+/// Storage intentionally aliases the legacy <see cref="DataLoader.data"/> field and
+/// <see cref="ModLoader"/> tables: old mods write those members directly, and the API must observe
+/// the same objects.
 /// </para>
 /// </summary>
 public static class MslContext
 {
-    private static UndertaleData? _data;
+    private static bool _attached;
 
     /// <summary>The data.win currently being patched.</summary>
     /// <exception cref="InvalidOperationException">No game data has been attached yet.</exception>
-    public static UndertaleData Data =>
-        _data ?? throw new InvalidOperationException("No game data (data.win) is currently loaded.");
+    public static UndertaleData Data
+    {
+        get
+        {
+            if (!_attached)
+            {
+                throw new InvalidOperationException("No game data (data.win) is currently loaded.");
+            }
 
-    public static bool HasData => _data is not null;
+            return DataLoader.data;
+        }
+    }
 
-    /// <summary>The weapon table loaded by <see cref="GameTableCodec.Initialize"/>.</summary>
-    public static List<string> Weapons = new();
+    public static bool HasData => _attached;
 
-    /// <summary>The equipment description table loaded by <see cref="GameTableCodec.Initialize"/>.</summary>
-    public static List<string> WeaponDescriptions = new();
+    /// <summary>The weapon table loaded by <see cref="GameTableCodec.Initialize"/> (legacy storage).</summary>
+    public static List<string> Weapons => ModLoader.Weapons;
+
+    /// <summary>The equipment description table loaded by <see cref="GameTableCodec.Initialize"/> (legacy storage).</summary>
+    public static List<string> WeaponDescriptions => ModLoader.WeaponDescriptions;
 
     internal static List<Menu> Menus = new();
     internal static List<(string, string[])> Credits = new();
     internal static List<(string, UndertaleRoom.GameObject)> Disclaimers = new();
 
-    /// <summary>Callbacks registered by mods for the script engine protocol.</summary>
-    public static Dictionary<string, Action<string>> ScriptCallbacks = new();
+    /// <summary>Callbacks registered by mods for the script engine protocol (legacy storage).</summary>
+    public static Dictionary<string, Action<string>> ScriptCallbacks => ModLoader.ScriptCallbacks;
 
-    internal static void Attach(UndertaleData data) => _data = data;
+    internal static void Attach(UndertaleData data)
+    {
+        DataLoader.data = data;
+        _attached = true;
+    }
 
-    internal static void Detach() => _data = null;
+    internal static void Detach()
+    {
+        DataLoader.data = new UndertaleData();
+        _attached = false;
+    }
 
     internal static void AddCredit(string modNameShort, string[] authors) =>
         Credits.Add((modNameShort, authors));
