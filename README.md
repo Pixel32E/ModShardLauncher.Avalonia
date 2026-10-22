@@ -1,6 +1,6 @@
 # ModShardLauncher（Avalonia 重构版）
 
-《石质碎片》（Stoneshard）的**模组管理器**与**模组制作工具**。本仓库是从 WPF 版本重构而来的 .NET 10 + Avalonia 桌面应用；同一个可执行文件也提供无头 CLI。
+《石质碎片》（Stoneshard）的**模组管理器**与**模组制作工具**。本仓库是从 WPF 版本重构而来的 .NET 10 项目，包含 **GUI（Avalonia）** 与 **CLI（无头）** 两个独立的可执行文件，共享同一个 Core 库。
 
 ![主界面](docs/assets/main-window.png)
 
@@ -8,19 +8,21 @@
 
 - 打开原版 `data.win`，扫描 `Mods/*.sml`，启用/禁用模组，打补丁并另存为新文件。
 - 打开数据文件时，选择器默认定位到 Steam 安装目录 `C:\Program Files (x86)\Steam\steamapps\common\Stoneshard`；该目录不存在时回退到当前工作目录。
+- 保存时默认建议 `<原文件名>_patched.win`，并禁止覆盖当前已加载的原版 `data.win`。
 - 在 `ModSources/` 中编译 C# 模组工程为 `.sml`（运行时 Roslyn，保留原有流程）。
 - 完整保留 `Msl` modding API（命名空间、类型、方法签名不变）；程序集版本固定为 `1.0.0.0`，旧 `.sml` 通过独立 `AssemblyLoadContext` 按简单名绑定宿主 API，无需重新编译。
 - 现代 IDE 风格界面：顶部菜单 + 工具栏 + 左侧导航 + 底部固定高度日志面板（实时显示补丁过程，不可拖拽调整）+ 状态栏。
 - 中 / 英 / 俄三语，采用标准 `.resx` + satellite assemblies；默认跟随 Windows 显示语言，没有对应翻译时回退英文，可在设置中固定语言。
-- 无头 CLI：批量打补丁、列出模组、编译模组、导出数据，便于 CI 和服务器使用。
+- 独立 CLI：批量打补丁、列出模组、编译模组、导出数据，便于 CI 和服务器使用。
 
 ## 解决方案结构
 
-| 项目 | 程序集名 | 说明 |
-|---|---|---|
-| `src/ModShardLauncher.Core` | `ModShardLauncher` | Modding API + 补丁/加载/纹理/编译等全部领域逻辑，**无任何 UI 依赖** |
-| `src/ModShardLauncher.Desktop` | `ModShardLauncher.Desktop` | Avalonia 桌面客户端（MVVM）+ 无头 CLI（同一可执行文件） |
-| `tests/ModShardLauncher.Tests` | `ModShardLauncher.Tests` | xUnit 单元测试（跨平台） |
+| 项目 | 程序集名 | 输出 | 说明 |
+|---|---|---|---|
+| `src/ModShardLauncher.Core` | `ModShardLauncher` | 库 | Modding API + 补丁/加载/纹理/编译等全部领域逻辑，**无任何 UI 依赖** |
+| `src/ModShardLauncher.GUI` | `ModShardLauncher.GUI` | `ModShardLauncher.GUI.exe` | Avalonia 桌面客户端（MVVM） |
+| `src/ModShardLauncher.CLI` | `ModShardLauncher.CLI` | `ModShardLauncher.CLI.exe` | 无头命令行工具 |
+| `tests/ModShardLauncher.Tests` | `ModShardLauncher.Tests` | 测试 | xUnit 单元测试（跨平台） |
 
 > **重要**：Core 的程序集名必须是 `ModShardLauncher`。已发布的 `.sml` 内部程序集引用了这个程序集名，改名会让所有历史模组失效。
 
@@ -34,32 +36,39 @@
 ## 构建、运行与测试
 
 ```powershell
-# 还原 + 构建整个解决方案
+# 还原 + 构建整个解决方案（同时产出两个 exe）
 dotnet build ModShardLauncher.Avalonia.slnx -c Release
 
 # 运行桌面客户端
-dotnet run --project src/ModShardLauncher.Desktop
+dotnet run --project src/ModShardLauncher.GUI
 
-# 以 CLI 方式运行同一个程序
-dotnet run --project src/ModShardLauncher.Desktop -- --version
+# 运行 CLI
+dotnet run --project src/ModShardLauncher.CLI -- --version
 
 # 运行单元测试
 dotnet test tests/ModShardLauncher.Tests
 ```
 
-> 便携模式：`Mods/`、`ModSources/`、`logs/`、`Settings.json` 都相对于**进程工作目录**。从发布目录直接启动 `ModShardLauncher.Desktop.exe` 即可得到和旧版一致的便携布局。旧版 `Settings.json` 可直接复用。
+> 便携模式：`Mods/`、`ModSources/`、`logs/`、`Settings.json` 都相对于**进程工作目录**。从发布目录启动 `ModShardLauncher.GUI.exe` 或 `ModShardLauncher.CLI.exe` 即可得到和旧版一致的便携布局。旧版 `Settings.json` 可直接复用。
 
-## 发布（多文件 self-contained）
+## 发布（多文件 self-contained，两个 exe 同一目录）
 
 ```powershell
-dotnet publish src/ModShardLauncher.Desktop/ModShardLauncher.Desktop.csproj `
+# 一条命令同时发布 GUI 与 CLI 到 publish/
+.\scripts\publish.ps1
+```
+
+脚本等价于：
+
+```powershell
+dotnet publish src/ModShardLauncher.GUI/ModShardLauncher.GUI.csproj `
+  -c Release -r win-x64 --self-contained true -o publish
+
+dotnet publish src/ModShardLauncher.CLI/ModShardLauncher.CLI.csproj `
   -c Release -r win-x64 --self-contained true -o publish
 ```
 
-只需要发布这一个可执行文件：
-
-- 双击 `ModShardLauncher.Desktop.exe`（无参数）→ 启动图形界面；
-- 在终端带参数运行同一个 exe → 执行 CLI 命令。
+发布目录会同时包含 `ModShardLauncher.GUI.exe` 与 `ModShardLauncher.CLI.exe`，共享同一份 Core/依赖。
 
 发布目录需要保持**多文件**：
 
@@ -69,14 +78,12 @@ dotnet publish src/ModShardLauncher.Desktop/ModShardLauncher.Desktop.csproj `
 
 ## CLI
 
-与桌面端是**同一个可执行文件**：无参数启动 GUI，带参数执行 CLI。
-
 ```text
-ModShardLauncher.Desktop.exe patch   --data <vanilla.win> --output <patched.win>
-                                     [--mods <dir>] [--enable name1,name2 | --all]
-ModShardLauncher.Desktop.exe list    [--mods <dir>]
-ModShardLauncher.Desktop.exe compile --source <project-dir> [--mods <dir>]
-ModShardLauncher.Desktop.exe export  --data <vanilla.win> --type items|codes|presets
+ModShardLauncher.CLI.exe patch   --data <vanilla.win> --output <patched.win>
+                                 [--mods <dir>] [--enable name1,name2 | --all]
+ModShardLauncher.CLI.exe list    [--mods <dir>]
+ModShardLauncher.CLI.exe compile --source <project-dir> [--mods <dir>]
+ModShardLauncher.CLI.exe export  --data <vanilla.win> --type items|codes|presets
 
 全局选项：
   --workdir <dir>   覆盖便携工作目录（默认当前目录）
@@ -88,14 +95,14 @@ ModShardLauncher.Desktop.exe export  --data <vanilla.win> --type items|codes|pre
 
 ```powershell
 # 打补丁：启用全部模组
-ModShardLauncher.Desktop.exe patch --data D:\Games\Stoneshard\data.win `
+ModShardLauncher.CLI.exe patch --data D:\Games\Stoneshard\data.win `
   --output .\modded.win --all
 
 # 只启用指定模组
-ModShardLauncher.Desktop.exe patch --data .\data.win --output .\out.win --enable Quicksave,SpeedManager
+ModShardLauncher.CLI.exe patch --data .\data.win --output .\out.win --enable Quicksave,SpeedManager
 
 # 编译 ModSources 下的工程
-ModShardLauncher.Desktop.exe compile --source .\ModSources\MyMod
+ModShardLauncher.CLI.exe compile --source .\ModSources\MyMod
 ```
 
 退出码：`0` 成功，`1` 参数错误，`2` 编译/补丁失败，`3` 未处理异常。
@@ -105,24 +112,23 @@ ModShardLauncher.Desktop.exe compile --source .\ModSources\MyMod
 ```
 <工作目录>/
 ├─ data.win              # 任意位置的原版数据文件
-├─ Settings.json         # 与旧版同名字段：Language / EnableLogger / EnabledMods
+├─ Settings.json         # 与旧版同名字段：Language / LanguageChosen / EnableLogger / EnabledMods
 ├─ Mods/                 # *.sml 模组包
 ├─ ModSources/           # C# 模组工程（含 .csproj 的子目录）
-└─ logs/                 # 文件日志（Serilog），界面底部日志面板同步显示
+└─ logs/                 # 文件日志（Serilog），GUI 底部日志面板同步显示
 ```
 
 ## 本地化
 
-- 资源文件：`src/ModShardLauncher.Desktop/Resources/Strings.resx`（英文，中立资源）、`Strings.zh-Hans.resx`、`Strings.ru.resx`。
+- 资源文件：`src/ModShardLauncher.GUI/Resources/Strings.resx`（英文，中立资源）、`Strings.zh-Hans.resx`、`Strings.ru.resx`。
 - 使用标准 `ResourceManager` + 卫星程序集，没有自研格式。
 - XAML 中通过 `{loc:Tr Key}` 绑定到可观察的 `LocalizedText`，切换语言后所有界面文本即时刷新。
 - 新增语言：添加 `Strings.<culture>.resx`，并在 `SettingsViewModel.Languages` 中注册。
 
 ## 已知问题
 
-本次重构以**功能对等迁移**为第一目标，分析报告中 5.1 节列出的历史缺陷暂未修复（详见 [`docs/deferred-bugs.md`](docs/deferred-bugs.md)），包括：
+本次重构以**功能对等迁移**为第一目标，分析报告中 5.1 节列出的部分历史缺陷仍保留（详见 [`docs/deferred-bugs.md`](docs/deferred-bugs.md)），包括：
 
-- 补丁失败时优先定位“正在打补丁的模组”的 `First()` 逻辑；
 - 每次打补丁都会向 `Settings.EnabledMods` 追加记录；
 - 打开数据文件时自动导出 `export/` 的副作用；
 - 模组接口服务器的忙等循环；

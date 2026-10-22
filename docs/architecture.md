@@ -14,11 +14,12 @@
 ## 2. 工程与依赖方向
 
 ```
-┌──────────────────────────────────────────────┐
-│ ModShardLauncher.Desktop                     │
-│ Avalonia 12 + MVVM / 无参数=GUI，有参数=CLI  │
-└──────────────────────┬───────────────────────┘
-                       ▼
+┌──────────────────────────────┐   ┌──────────────────────────────┐
+│ ModShardLauncher.GUI         │   │ ModShardLauncher.CLI         │
+│ Avalonia 12 + MVVM           │   │ 控制台（无 UI）               │
+└──────────────┬───────────────┘   └──────────────┬───────────────┘
+               └───────────────┬──────────────────┘
+                               ▼
               ┌────────────────────────────────────┐
               │ ModShardLauncher (Core)            │
               │ AssemblyName = ModShardLauncher    │
@@ -33,10 +34,10 @@
 
 依赖规则：
 
-1. **只允许单向依赖**：Desktop → Core → UTMT 二进制。
+1. **只允许单向依赖**：GUI/CLI → Core → UTMT 二进制。
 2. Core 不引用任何 UI 包；View 只通过 ViewModel 调用 Core。
 3. 跨层通信使用接口/事件/`IProgress`，Core 不弹窗、不读写控件、不 `Dispatcher.Invoke`。
-4. 第三方 mod 代码只能看到 Core（程序集 `ModShardLauncher`），看不到 Desktop。
+4. 第三方 mod 代码只能看到 Core（程序集 `ModShardLauncher`），看不到 GUI/CLI。
 
 ## 3. Core 分层
 
@@ -126,14 +127,12 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
   → 成功后重新扫描 Mods/
 ```
 
-### 5.4 CLI 模式
+### 5.4 GUI 与 CLI 两个可执行文件
 
-`Program.Main` 根据参数分派：
+- `ModShardLauncher.GUI.exe`（WinExe）→ 启动 Avalonia，不产生控制台窗口；
+- `ModShardLauncher.CLI.exe`（Exe）→ `CliApplication` 解析并执行 `patch`/`list`/`compile`/`export`，退出码 0/1/2/3，日志同时写入控制台与 `logs/cli_*.txt`。
 
-- `args.Length == 0` → `FreeConsole()` 后启动 Avalonia，GUI 不会残留控制台窗口；
-- 有参数 → `Cli/CliApplication` 解析并执行 `patch`/`list`/`compile`/`export`，退出码 0/1/2/3。
-
-可执行文件使用控制台子系统，保证 shell 能等待进程并读取退出码；GUI 模式启动时立即分离控制台。CLI 的日志同时写入控制台与 `logs/cli_*.txt`。
+两者都只依赖 `ModShardLauncher`（Core），发布时由 `scripts/publish.ps1` 输出到同一目录。
 ## 6. 状态与线程
 
 - `UndertaleData` 只在补丁线程/加载线程上访问；UI 线程只读取展示字段。
@@ -187,7 +186,7 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
 
 | 旧文件 | 新文件 |
 |---|---|
-| `App.xaml` / `Main.xaml` / `Controls/*` | `Desktop/Views/*` + `Desktop/ViewModels/*` |
+| `App.xaml` / `Main.xaml` / `Controls/*` | `GUI/Views/*` + `GUI/ViewModels/*` |
 | `Main.xaml.cs`（外壳/设置） | `MainWindowViewModel`、`AppServices`、`SettingsViewModel` |
 | `DataLoader.cs` | `Runtime/GameDataService.cs` |
 | `ModLoader.cs` | `Runtime/ModCatalog.cs` + `Runtime/PatchRunner.cs` |
@@ -195,7 +194,7 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
 | `TextureLoader.cs` | `Runtime/Textures/TextureSourceScanner.cs`、`TextureAtlasBuilder.cs`、`SpriteCollisionMask.cs`、`TextureInjector.cs` |
 | `FilePacker.cs` | `Runtime/ModCompiler.cs` |
 | `MSLDiagnostic.cs` | `Runtime/PatchDiagnostic.cs` |
-| `Core/UI/ErrorMessageDialog.cs` | `Desktop/Views/ErrorDialog.axaml` |
+| `Core/UI/ErrorMessageDialog.cs` | `GUI/Views/ErrorDialog.axaml` |
 | `CodeResources.cs` | `Runtime/GmlResources.cs` |
 | `Loader/Exporter.cs` | `Runtime/GameDataExporter.cs` |
 | `Loader/ChecksumChecker.cs` | `Runtime/DataChecksumValidator.cs` |
@@ -221,7 +220,7 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
 
 - **新增游戏表**：在 `Modding/Tables/` 下按现有模式添加 `XxxTable.cs`，包含枚举与 `Msl.InjectTableXxx`。
 - **新增本地化字符串**：在三个 `Strings.*.resx` 中添加同名 key，XAML 用 `{loc:Tr Key}`。
-- **新增 CLI 命令**：在 `Cli/CliCommands.cs` 添加方法，并在 `Cli/CliApplication.cs` 的 switch 中注册。
+- **新增 CLI 命令**：在 `src/ModShardLauncher.CLI/CliCommands.cs` 添加方法，并在 `CliApplication.cs` 的 switch 中注册。
 - **新增页面**：新建 `XxxViewModel` + `XxxView`，在 `App.axaml` 的 `DataTemplates` 注册，并把导航项加入 `MainWindowViewModel.NavigationItems`。
 - **替换/升级 UTMT 库**：只允许在 `Core.csproj` 的 `<Reference>` 中改版本，并跑一遍完整回归；`Msl` 的公开签名依赖其类型。
 
