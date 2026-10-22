@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/ModShardLauncher.Core/ModShardLauncher.Core.csproj" />
+  <Project Path="src/ModShardLauncher.Desktop/ModShardLauncher.Desktop.csproj" />
+  <Project Path="src/ModShardLauncher.Cli/ModShardLauncher.Cli.csproj" />
+  <Project Path="tests/ModShardLauncher.Tests/ModShardLauncher.Tests.csproj" />
+</Solution>

@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:ModShardLauncher.Desktop.Services"
+             x:Class="ModShardLauncher.Desktop.Views.HomeView">
+
+  <ScrollViewer>
+    <StackPanel Spacing="16" MaxWidth="980" HorizontalAlignment="Left">
+
+      <StackPanel Spacing="4">
+        <TextBlock Text="{loc:Tr HomeTitle}" Classes="h1" />
+        <TextBlock Text="{loc:Tr HomeSubtitle}" Classes="subtitle" />
+      </StackPanel>
+
+      <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+        <Border Grid.Column="0" Classes="stat">
+          <StackPanel Spacing="4">
+            <TextBlock Text="{loc:Tr HomeStatsData}" Classes="section" />
+            <TextBlock Text="{Binding Main.DataFileDisplay}" FontSize="15" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Classes="stat">
+          <StackPanel Spacing="4">
+            <TextBlock Text="{loc:Tr HomeStatsMods}" Classes="section" />
+            <TextBlock Text="{Binding Main.ModsCountDisplay}" FontSize="15" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Classes="stat">
+          <StackPanel Spacing="4">
+            <TextBlock Text="{loc:Tr HomeStatsEnabled}" Classes="section" />
+            <TextBlock Text="{Binding Main.EnabledCountDisplay}" FontSize="15" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="3" Classes="stat">
+          <StackPanel Spacing="4">
+            <TextBlock Text="{loc:Tr HomeStatsSources}" Classes="section" />
+            <TextBlock Text="{Binding Main.SourcesCountDisplay}" FontSize="15" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Text="{loc:Tr HomeQuickActions}" Classes="section" />
+          <WrapPanel>
+            <Button Content="{loc:Tr HomeOpenData}" Command="{Binding Main.OpenDataCommand}"
+                    Classes="primary" Margin="0,0,8,8" />
+            <Button Content="{loc:Tr HomePatchSave}" Command="{Binding Main.PatchAndSaveCommand}"
+                    Margin="0,0,8,8" />
+            <Button Content="{loc:Tr HomeOpenMods}" Command="{Binding Main.ShowModsCommand}"
+                    Margin="0,0,8,8" />
+            <Button Content="{loc:Tr HomeOpenSources}" Command="{Binding Main.ShowSourcesCommand}"
+                    Margin="0,0,8,8" />
+            <Button Content="{loc:Tr HomeOpenSettings}" Command="{Binding Main.ShowSettingsCommand}"
+                    Margin="0,0,8,8" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{loc:Tr HomeHint}" Classes="section" />
+          <TextBlock Text="{loc:Tr HomeHintBody}" Classes="caption" />
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

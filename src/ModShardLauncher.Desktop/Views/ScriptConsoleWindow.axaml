@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:ModShardLauncher.Desktop.Services"
+        x:Class="ModShardLauncher.Desktop.Views.ScriptConsoleWindow"
+        Title="{loc:Tr ScriptConsoleTitle}"
+        Width="780" Height="540"
+        MinWidth="520" MinHeight="320"
+        WindowStartupLocation="CenterOwner">
+
+  <Grid Margin="12" RowDefinitions="*,Auto">
+
+    <Border Classes="card" Padding="8">
+      <ListBox Name="MessageList" Background="Transparent"
+               ScrollViewer.HorizontalScrollBarVisibility="Auto">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" FontFamily="Consolas" FontSize="12"
+                       Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,10,0,0">
+      <TextBox Name="InputBox" PlaceholderText="{loc:Tr ScriptConsoleInput}" KeyDown="Input_KeyDown" />
+      <Button Grid.Column="1" Content="{loc:Tr ScriptConsoleSend}" Click="Send_Click"
+              Classes="primary" Margin="8,0,0,0" />
+    </Grid>
+
+  </Grid>
+</Window>
