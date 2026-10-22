@@ -79,16 +79,8 @@ public sealed class AppServices
             new DialogService());
 
         services.ApplyLogLevel();
-        services.Catalog.Reload();
-        services.Catalog.ApplyEnabledMods(settings.EnabledMods);
-        Log.Information("Loaded {Mods} mod(s) and {Sources} mod source(s)",
-            services.Catalog.Mods.Count, services.Catalog.ModSources.Count);
 
         Log.Information("Launching msl {{{0}}} using UTMT {{{1}}}", AppInfo.MslVersion, AppInfo.UtmtLibVersion);
-        foreach (string error in services.Catalog.LoadErrors)
-        {
-            Log.Warning(error);
-        }
 
         Current = services;
         return services;

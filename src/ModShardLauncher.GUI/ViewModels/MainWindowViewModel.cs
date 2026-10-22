@@ -347,6 +347,24 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public void SaveSettings() => _services.SaveSettings();
 
+    /// <summary>
+    /// Runs the reload workflow once when the shell is shown, so the mod list is populated on
+    /// startup without the user having to press "Reload".
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+        try
+        {
+            await ReloadCatalogCoreAsync(applySavedEnabledMods: true);
+            SetStatus("StatusReady");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Initial mod reload failed");
+            SetStatus("StatusFailed");
+        }
+    }
+
     public void OnLanguageChanged()
     {
         OnPropertyChanged(nameof(VersionText));
@@ -366,11 +384,21 @@ public sealed partial class MainWindowViewModel : ObservableObject
         SettingsPage.RefreshLocalized();
     }
 
-    private async Task ReloadCatalogCoreAsync()
+    private async Task ReloadCatalogCoreAsync(bool applySavedEnabledMods = false)
     {
         _services.Catalog.Reload();
+        if (applySavedEnabledMods)
+        {
+            _services.Catalog.ApplyEnabledMods(_services.Settings.EnabledMods);
+        }
+
         Log.Information("Loaded {Mods} mod(s) and {Sources} mod source(s)",
             _services.Catalog.Mods.Count, _services.Catalog.ModSources.Count);
+        foreach (string error in _services.Catalog.LoadErrors)
+        {
+            Log.Warning(error);
+        }
+
         await Mods.SyncAsync();
         await Sources.SyncAsync();
         OnPropertyChanged(nameof(HasData));

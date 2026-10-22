@@ -27,6 +27,7 @@ public partial class App : Application
             };
 
             services.Dialogs.Attach(window);
+            window.Opened += async (_, _) => await viewModel.InitializeAsync();
             window.Closing += (_, _) =>
             {
                 services.SaveSettings();
