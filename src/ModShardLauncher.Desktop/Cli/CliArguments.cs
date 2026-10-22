@@ -1,4 +1,4 @@
-namespace ModShardLauncher.Cli;
+namespace ModShardLauncher.Desktop.Cli;
 
 /// <summary>Small, dependency free command line parser for the headless launcher.</summary>
 internal sealed class CliArguments
@@ -112,11 +112,15 @@ internal sealed class CliArguments
             ModShardLauncher CLI - headless mod patching for Stoneshard.
 
             Usage:
-              ModShardLauncher.Cli patch   --data <vanilla.win> --output <patched.win>
-                                           [--mods <dir>] [--enable name1,name2 | --all]
-              ModShardLauncher.Cli list    [--mods <dir>]
-              ModShardLauncher.Cli compile --source <project-dir> [--mods <dir>]
-              ModShardLauncher.Cli export  --data <vanilla.win> --type items|codes|presets
+              ModShardLauncher.Desktop.exe patch   --data <vanilla.win> --output <patched.win> [options]
+              ModShardLauncher.Desktop.exe list    [options]
+              ModShardLauncher.Desktop.exe compile --source <project-dir> [options]
+              ModShardLauncher.Desktop.exe export  --data <vanilla.win> --type items|codes|presets
+
+            Patch options:
+              --mods <dir>          Mods directory (default: <workdir>/Mods)
+              --enable name1,name2  Enable only these mods
+              --all                 Enable every installed mod
 
             Global options:
               --workdir <dir>   Override the portable working directory (default: current directory)

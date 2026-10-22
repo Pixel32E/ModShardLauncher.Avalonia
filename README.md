@@ -1,6 +1,6 @@
 # ModShardLauncher（Avalonia 重构版）
 
-《石质碎片》（Stoneshard）的**模组管理器**与**模组制作工具**。本仓库是从 WPF 版本重构而来的 .NET 10 + Avalonia 桌面应用，同时提供无头 CLI。
+《石质碎片》（Stoneshard）的**模组管理器**与**模组制作工具**。本仓库是从 WPF 版本重构而来的 .NET 10 + Avalonia 桌面应用；同一个可执行文件也提供无头 CLI。
 
 ![主界面](docs/assets/main-window.png)
 
@@ -19,8 +19,7 @@
 | 项目 | 程序集名 | 说明 |
 |---|---|---|
 | `src/ModShardLauncher.Core` | `ModShardLauncher` | Modding API + 补丁/加载/纹理/编译等全部领域逻辑，**无任何 UI 依赖** |
-| `src/ModShardLauncher.Desktop` | `ModShardLauncher.Desktop` | Avalonia 桌面客户端（MVVM） |
-| `src/ModShardLauncher.Cli` | `ModShardLauncher.Cli` | 无头命令行工具 |
+| `src/ModShardLauncher.Desktop` | `ModShardLauncher.Desktop` | Avalonia 桌面客户端（MVVM）+ 无头 CLI（同一可执行文件） |
 | `tests/ModShardLauncher.Tests` | `ModShardLauncher.Tests` | xUnit 单元测试（跨平台） |
 
 > **重要**：Core 的程序集名必须是 `ModShardLauncher`。已发布的 `.sml` 内部程序集引用了这个程序集名，改名会让所有历史模组失效。
@@ -41,6 +40,9 @@ dotnet build ModShardLauncher.Avalonia.slnx -c Release
 # 运行桌面客户端
 dotnet run --project src/ModShardLauncher.Desktop
 
+# 以 CLI 方式运行同一个程序
+dotnet run --project src/ModShardLauncher.Desktop -- --version
+
 # 运行单元测试
 dotnet test tests/ModShardLauncher.Tests
 ```
@@ -51,11 +53,13 @@ dotnet test tests/ModShardLauncher.Tests
 
 ```powershell
 dotnet publish src/ModShardLauncher.Desktop/ModShardLauncher.Desktop.csproj `
-  -c Release -r win-x64 --self-contained true -o publish/desktop
-
-dotnet publish src/ModShardLauncher.Cli/ModShardLauncher.Cli.csproj `
-  -c Release -r win-x64 --self-contained true -o publish/cli
+  -c Release -r win-x64 --self-contained true -o publish
 ```
+
+只需要发布这一个可执行文件：
+
+- 双击 `ModShardLauncher.Desktop.exe`（无参数）→ 启动图形界面；
+- 在终端带参数运行同一个 exe → 执行 CLI 命令。
 
 发布目录需要保持**多文件**：
 
@@ -65,12 +69,14 @@ dotnet publish src/ModShardLauncher.Cli/ModShardLauncher.Cli.csproj `
 
 ## CLI
 
+与桌面端是**同一个可执行文件**：无参数启动 GUI，带参数执行 CLI。
+
 ```text
-ModShardLauncher.Cli patch   --data <vanilla.win> --output <patched.win>
-                             [--mods <dir>] [--enable name1,name2 | --all]
-ModShardLauncher.Cli list    [--mods <dir>]
-ModShardLauncher.Cli compile --source <project-dir> [--mods <dir>]
-ModShardLauncher.Cli export  --data <vanilla.win> --type items|codes|presets
+ModShardLauncher.Desktop.exe patch   --data <vanilla.win> --output <patched.win>
+                                     [--mods <dir>] [--enable name1,name2 | --all]
+ModShardLauncher.Desktop.exe list    [--mods <dir>]
+ModShardLauncher.Desktop.exe compile --source <project-dir> [--mods <dir>]
+ModShardLauncher.Desktop.exe export  --data <vanilla.win> --type items|codes|presets
 
 全局选项：
   --workdir <dir>   覆盖便携工作目录（默认当前目录）
@@ -82,14 +88,14 @@ ModShardLauncher.Cli export  --data <vanilla.win> --type items|codes|presets
 
 ```powershell
 # 打补丁：启用全部模组
-ModShardLauncher.Cli.exe patch --data D:\Games\Stoneshard\data.win `
+ModShardLauncher.Desktop.exe patch --data D:\Games\Stoneshard\data.win `
   --output .\modded.win --all
 
 # 只启用指定模组
-ModShardLauncher.Cli.exe patch --data .\data.win --output .\out.win --enable Quicksave,SpeedManager
+ModShardLauncher.Desktop.exe patch --data .\data.win --output .\out.win --enable Quicksave,SpeedManager
 
 # 编译 ModSources 下的工程
-ModShardLauncher.Cli.exe compile --source .\ModSources\MyMod
+ModShardLauncher.Desktop.exe compile --source .\ModSources\MyMod
 ```
 
 退出码：`0` 成功，`1` 参数错误，`2` 编译/补丁失败，`3` 未处理异常。

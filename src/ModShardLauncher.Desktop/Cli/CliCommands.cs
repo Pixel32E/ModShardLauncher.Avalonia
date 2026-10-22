@@ -1,9 +1,9 @@
 using ModShardLauncher;
 using Serilog;
 
-namespace ModShardLauncher.Cli;
+namespace ModShardLauncher.Desktop.Cli;
 
-internal static class Commands
+internal static class CliCommands
 {
     public static async Task<int> PatchAsync(CliArguments arguments)
     {
