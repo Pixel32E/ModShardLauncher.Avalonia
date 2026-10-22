@@ -26,8 +26,6 @@ UndertaleModTool {1}
   <data name="ToolbarPatch" xml:space="preserve"><value>打补丁并保存</value></data>
   <data name="HomeStatsEnabled" xml:space="preserve"><value>已启用</value></data>
   <data name="MenuShowSources" xml:space="preserve"><value>模组源码</value></data>
-  <data name="HomeOpenSettings" xml:space="preserve"><value>设置</value></data>
-  <data name="HomePatchSave" xml:space="preserve"><value>打补丁并保存</value></data>
   <data name="DialogCopy" xml:space="preserve"><value>复制</value></data>
   <data name="MenuTools" xml:space="preserve"><value>工具</value></data>
   <data name="StatusPatchFailed" xml:space="preserve"><value>打补丁失败</value></data>
@@ -54,7 +52,6 @@ UndertaleModTool {1}
   <data name="ModsSubtitle" xml:space="preserve"><value>Mods 文件夹中的 .sml 模组。</value></data>
   <data name="MenuMods" xml:space="preserve"><value>模组</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>《石质碎片》模组管理器与制作工具。</value></data>
-  <data name="HomeQuickActions" xml:space="preserve"><value>快捷操作</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>设置</value></data>
   <data name="ModsEmptyHint" xml:space="preserve"><value>把 .sml 文件放入 Mods 文件夹后重新加载。</value></data>
   <data name="LogTitle" xml:space="preserve"><value>日志</value></data>
@@ -69,10 +66,8 @@ UndertaleModTool {1}
   <data name="MenuOpenLogs" xml:space="preserve"><value>打开日志文件夹</value></data>
   <data name="HomeHint" xml:space="preserve"><value>使用流程</value></data>
   <data name="SettingsModsFolder" xml:space="preserve"><value>模组</value></data>
-  <data name="HomeOpenMods" xml:space="preserve"><value>管理模组</value></data>
   <data name="NavMods" xml:space="preserve"><value>模组</value></data>
   <data name="SourcesSubtitle" xml:space="preserve"><value>ModSources 文件夹中的 C# 工程，可编译为 .sml。</value></data>
-  <data name="HomeOpenData" xml:space="preserve"><value>打开 data.win</value></data>
   <data name="MenuScriptConsole" xml:space="preserve"><value>脚本控制台</value></data>
   <data name="SourcesOpenFolder" xml:space="preserve"><value>打开文件夹</value></data>
   <data name="NavSettings" xml:space="preserve"><value>设置</value></data>
@@ -97,7 +92,6 @@ UndertaleModTool {1}
   <data name="SourcesCount" xml:space="preserve"><value>{0} 个项目</value></data>
   <data name="SettingsPaths" xml:space="preserve"><value>文件夹</value></data>
   <data name="MenuHelp" xml:space="preserve"><value>帮助</value></data>
-  <data name="HomeOpenSources" xml:space="preserve"><value>模组源码</value></data>
   <data name="CommonOff" xml:space="preserve"><value>关</value></data>
   <data name="DialogOk" xml:space="preserve"><value>确定</value></data>
   <data name="ServerStarted" xml:space="preserve"><value>Mod 接口服务器已启动，端口 {0}。</value></data>
@@ -111,4 +105,5 @@ UndertaleModTool {1}
   <data name="MenuFile" xml:space="preserve"><value>文件</value></data>
   <data name="ModsEmpty" xml:space="preserve"><value>未找到模组</value></data>
   <data name="MenuOpenModsFolder" xml:space="preserve"><value>打开模组文件夹</value></data>
+  <data name="MenuSettings" xml:space="preserve"><value>设置</value></data>
 </root>

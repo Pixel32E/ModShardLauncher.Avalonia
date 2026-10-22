@@ -9,6 +9,9 @@ namespace ModShardLauncher.Desktop.Services;
 /// <summary>All window/file interactions the view models are allowed to perform.</summary>
 public sealed class DialogService
 {
+    /// <summary>Default Steam installation folder for Stoneshard, used as the picker's start location.</summary>
+    private const string StoneshardSteamFolder = @"C:\Program Files (x86)\Steam\steamapps\common\Stoneshard";
+
     private Window? _owner;
 
     public void Attach(Window owner) => _owner = owner;
@@ -25,9 +28,39 @@ public sealed class DialogService
             Title = LocalizationService.Instance["MenuOpenData"],
             AllowMultiple = false,
             FileTypeFilter = DataFileTypes,
+            SuggestedStartLocation = await ResolveInitialFolderAsync(),
         });
 
         return files.Count > 0 ? files[0].TryGetLocalPath() : null;
+    }
+
+    /// <summary>
+    /// Prefers the default Steam install of Stoneshard; when that folder does not exist the
+    /// portable working directory is used instead.
+    /// </summary>
+    private async Task<IStorageFolder?> ResolveInitialFolderAsync()
+    {
+        if (_owner is null)
+        {
+            return null;
+        }
+
+        string[] candidates = [StoneshardSteamFolder, AppPaths.BaseDirectory];
+        foreach (string candidate in candidates)
+        {
+            if (!Directory.Exists(candidate))
+            {
+                continue;
+            }
+
+            IStorageFolder? folder = await _owner.StorageProvider.TryGetFolderFromPathAsync(candidate);
+            if (folder is not null)
+            {
+                return folder;
+            }
+        }
+
+        return null;
     }
 
     public async Task<string?> PickSaveDataFileAsync()

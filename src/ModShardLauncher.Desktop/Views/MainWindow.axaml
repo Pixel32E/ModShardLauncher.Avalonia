@@ -36,6 +36,7 @@
           <MenuItem Header="{loc:Tr MenuOpenModsFolder}" Command="{Binding OpenModsFolderCommand}" />
           <MenuItem Header="{loc:Tr MenuOpenLogs}" Command="{Binding OpenLogsFolderCommand}" />
         </MenuItem>
+        <MenuItem Header="{loc:Tr MenuSettings}" Command="{Binding ShowSettingsCommand}" />
         <MenuItem Header="{loc:Tr MenuHelp}">
           <MenuItem Header="{loc:Tr MenuAbout}" Command="{Binding ShowAboutCommand}" />
         </MenuItem>

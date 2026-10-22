@@ -39,24 +39,6 @@
       </Grid>
 
       <Border Classes="card">
-        <StackPanel Spacing="10">
-          <TextBlock Text="{loc:Tr HomeQuickActions}" Classes="section" />
-          <WrapPanel>
-            <Button Content="{loc:Tr HomeOpenData}" Command="{Binding Main.OpenDataCommand}"
-                    Classes="primary" Margin="0,0,8,8" />
-            <Button Content="{loc:Tr HomePatchSave}" Command="{Binding Main.PatchAndSaveCommand}"
-                    Margin="0,0,8,8" />
-            <Button Content="{loc:Tr HomeOpenMods}" Command="{Binding Main.ShowModsCommand}"
-                    Margin="0,0,8,8" />
-            <Button Content="{loc:Tr HomeOpenSources}" Command="{Binding Main.ShowSourcesCommand}"
-                    Margin="0,0,8,8" />
-            <Button Content="{loc:Tr HomeOpenSettings}" Command="{Binding Main.ShowSettingsCommand}"
-                    Margin="0,0,8,8" />
-          </WrapPanel>
-        </StackPanel>
-      </Border>
-
-      <Border Classes="card">
         <StackPanel Spacing="6">
           <TextBlock Text="{loc:Tr HomeHint}" Classes="section" />
           <TextBlock Text="{loc:Tr HomeHintBody}" Classes="caption" />

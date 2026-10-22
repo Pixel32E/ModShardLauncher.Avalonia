@@ -26,8 +26,6 @@ UndertaleModTool {1}
   <data name="ToolbarPatch" xml:space="preserve"><value>Патч и сохранить</value></data>
   <data name="HomeStatsEnabled" xml:space="preserve"><value>Включено</value></data>
   <data name="MenuShowSources" xml:space="preserve"><value>Исходники модов</value></data>
-  <data name="HomeOpenSettings" xml:space="preserve"><value>Настройки</value></data>
-  <data name="HomePatchSave" xml:space="preserve"><value>Патч и сохранить</value></data>
   <data name="DialogCopy" xml:space="preserve"><value>Копировать</value></data>
   <data name="MenuTools" xml:space="preserve"><value>Инструменты</value></data>
   <data name="StatusPatchFailed" xml:space="preserve"><value>Патчинг не удался</value></data>
@@ -54,7 +52,6 @@ UndertaleModTool {1}
   <data name="ModsSubtitle" xml:space="preserve"><value>Пакеты .sml из папки Mods.</value></data>
   <data name="MenuMods" xml:space="preserve"><value>Моды</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>Менеджер модов и инструмент для моддинга Stoneshard.</value></data>
-  <data name="HomeQuickActions" xml:space="preserve"><value>Быстрые действия</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Настройки</value></data>
   <data name="ModsEmptyHint" xml:space="preserve"><value>Скопируйте .sml в папку Mods и перезагрузите.</value></data>
   <data name="LogTitle" xml:space="preserve"><value>Журнал</value></data>
@@ -69,10 +66,8 @@ UndertaleModTool {1}
   <data name="MenuOpenLogs" xml:space="preserve"><value>Открыть журнал</value></data>
   <data name="HomeHint" xml:space="preserve"><value>Порядок работы</value></data>
   <data name="SettingsModsFolder" xml:space="preserve"><value>Моды</value></data>
-  <data name="HomeOpenMods" xml:space="preserve"><value>Моды</value></data>
   <data name="NavMods" xml:space="preserve"><value>Моды</value></data>
   <data name="SourcesSubtitle" xml:space="preserve"><value>C# проекты из папки ModSources. Компилируются в .sml.</value></data>
-  <data name="HomeOpenData" xml:space="preserve"><value>Открыть data.win</value></data>
   <data name="MenuScriptConsole" xml:space="preserve"><value>Консоль скриптов</value></data>
   <data name="SourcesOpenFolder" xml:space="preserve"><value>Открыть папку</value></data>
   <data name="NavSettings" xml:space="preserve"><value>Настройки</value></data>
@@ -97,7 +92,6 @@ UndertaleModTool {1}
   <data name="SourcesCount" xml:space="preserve"><value>{0} проектов</value></data>
   <data name="SettingsPaths" xml:space="preserve"><value>Папки</value></data>
   <data name="MenuHelp" xml:space="preserve"><value>Справка</value></data>
-  <data name="HomeOpenSources" xml:space="preserve"><value>Исходники</value></data>
   <data name="CommonOff" xml:space="preserve"><value>Выкл</value></data>
   <data name="DialogOk" xml:space="preserve"><value>ОК</value></data>
   <data name="ServerStarted" xml:space="preserve"><value>Сервер Mod Interface запущен на порту {0}.</value></data>
@@ -111,4 +105,5 @@ UndertaleModTool {1}
   <data name="MenuFile" xml:space="preserve"><value>Файл</value></data>
   <data name="ModsEmpty" xml:space="preserve"><value>Моды не найдены</value></data>
   <data name="MenuOpenModsFolder" xml:space="preserve"><value>Открыть папку модов</value></data>
+  <data name="MenuSettings" xml:space="preserve"><value>Настройки</value></data>
 </root>

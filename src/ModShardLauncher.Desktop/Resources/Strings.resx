@@ -26,8 +26,6 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="ToolbarPatch" xml:space="preserve"><value>Patch and Save</value></data>
   <data name="HomeStatsEnabled" xml:space="preserve"><value>Enabled</value></data>
   <data name="MenuShowSources" xml:space="preserve"><value>Mod sources</value></data>
-  <data name="HomeOpenSettings" xml:space="preserve"><value>Settings</value></data>
-  <data name="HomePatchSave" xml:space="preserve"><value>Patch and Save</value></data>
   <data name="DialogCopy" xml:space="preserve"><value>Copy</value></data>
   <data name="MenuTools" xml:space="preserve"><value>Tools</value></data>
   <data name="StatusPatchFailed" xml:space="preserve"><value>Patching failed</value></data>
@@ -54,7 +52,6 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="ModsSubtitle" xml:space="preserve"><value>Packed .sml mods found in the Mods folder.</value></data>
   <data name="MenuMods" xml:space="preserve"><value>Mods</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>Stoneshard mod manager and modding toolkit.</value></data>
-  <data name="HomeQuickActions" xml:space="preserve"><value>Quick actions</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
   <data name="ModsEmptyHint" xml:space="preserve"><value>Copy .sml files into the Mods folder and reload.</value></data>
   <data name="LogTitle" xml:space="preserve"><value>Log</value></data>
@@ -69,10 +66,8 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="MenuOpenLogs" xml:space="preserve"><value>Open logs folder</value></data>
   <data name="HomeHint" xml:space="preserve"><value>Workflow</value></data>
   <data name="SettingsModsFolder" xml:space="preserve"><value>Mods</value></data>
-  <data name="HomeOpenMods" xml:space="preserve"><value>Manage mods</value></data>
   <data name="NavMods" xml:space="preserve"><value>Mods</value></data>
   <data name="SourcesSubtitle" xml:space="preserve"><value>C# projects found in the ModSources folder. Compile them into .sml packages.</value></data>
-  <data name="HomeOpenData" xml:space="preserve"><value>Open data.win</value></data>
   <data name="MenuScriptConsole" xml:space="preserve"><value>Script console</value></data>
   <data name="SourcesOpenFolder" xml:space="preserve"><value>Open folder</value></data>
   <data name="NavSettings" xml:space="preserve"><value>Settings</value></data>
@@ -97,7 +92,6 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="SourcesCount" xml:space="preserve"><value>{0} projects</value></data>
   <data name="SettingsPaths" xml:space="preserve"><value>Folders</value></data>
   <data name="MenuHelp" xml:space="preserve"><value>Help</value></data>
-  <data name="HomeOpenSources" xml:space="preserve"><value>Mod sources</value></data>
   <data name="CommonOff" xml:space="preserve"><value>Off</value></data>
   <data name="DialogOk" xml:space="preserve"><value>OK</value></data>
   <data name="ServerStarted" xml:space="preserve"><value>Mod Interface Server starts at port {0}.</value></data>
@@ -111,4 +105,5 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="MenuFile" xml:space="preserve"><value>File</value></data>
   <data name="ModsEmpty" xml:space="preserve"><value>No mods found</value></data>
   <data name="MenuOpenModsFolder" xml:space="preserve"><value>Open Mods folder</value></data>
+  <data name="MenuSettings" xml:space="preserve"><value>Settings</value></data>
 </root>
