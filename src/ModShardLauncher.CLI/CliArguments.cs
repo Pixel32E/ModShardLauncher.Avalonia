@@ -112,10 +112,10 @@ internal sealed class CliArguments
             ModShardLauncher CLI - headless mod patching for Stoneshard.
 
             Usage:
-              ModShardLauncher.GUI.exe patch   --data <vanilla.win> --output <patched.win> [options]
-              ModShardLauncher.GUI.exe list    [options]
-              ModShardLauncher.GUI.exe compile --source <project-dir> [options]
-              ModShardLauncher.GUI.exe export  --data <vanilla.win> --type items|codes|presets
+              ModShardLauncher.CLI.exe patch   --data <vanilla.win> --output <patched.win> [options]
+              ModShardLauncher.CLI.exe list    [options]
+              ModShardLauncher.CLI.exe compile --source <project-dir> [options]
+              ModShardLauncher.CLI.exe export  --data <vanilla.win> --type items|codes|presets
 
             Patch options:
               --mods <dir>          Mods directory (default: <workdir>/Mods)
