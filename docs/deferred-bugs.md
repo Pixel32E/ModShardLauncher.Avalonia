@@ -8,7 +8,7 @@
 | B2 | `PatchRunner.Patch` → `GetFailingMod` | 失败发生在日志注入或收尾阶段（尚无模组被标记 `Patching`）时，`First()` 会抛 `InvalidOperationException`，掩盖原始异常。 | **已修复**：改为 `FirstOrDefault`，`PatchDiagnostic` 接受可空模组名（`(unknown mod)`）。首次端到端测试时该缺陷掩盖了真实的 `PresentationFramework` 错误，故提前修复。 |
 | B3 | `ModFile.GetFile`、`TextureSourceScanner`、`SmlPackageReader` | `.sml` 内部路径使用 `\` 分隔，在非 Windows 上会失效。 | **Windows-only 目标下不构成问题**，未修改格式。 |
 | B4 | `ModInterfaceServer.AcceptCallback` | `while (Client.Connected) if (Available == 0) continue;` 忙等，占满一个核心。 | **已修复并回归**：改为专用监听线程上的阻塞式 `Socket.Receive`，连接关闭或服务停止时退出并清理 client，不再轮询 CPU。新增 `ModInterfaceServerTests` 用真实 loopback 连接验证消息接收。 |
-| B5 | `PatchRunner.ApplyMods` | 每次打补丁都向 `Main.Settings.EnabledMods` 追加模组名，从不去重。 | **原样保留**。 |
+| B5 | `PatchRunner.ApplyMods` | 每次打补丁都向 `Main.Settings.EnabledMods` 追加模组名，从不去重；禁用状态也不会同步，导致重启后旧模组被重新启用。 | **已修复并回归**：补丁过程不再写设置；保存设置（关闭窗口、切换语言/日志等）时用 `ModCatalog.GetEnabledModNames` 生成当前勾选状态的去重快照，启动时 `ApplyEnabledMods` 同样去重。新增 `EnabledModsTests`。 |
 | B6 | `GameDataService.LoadCore` | 每次加载 `data.win` 都调用 `data.Export(DataType.Items)`，删除并重建工作目录下的 `export/`。 | **原样保留**（旧行为）。 |
 | B7 | — | 旧版 `Main.Refresh()` 把控件从旧 `ContentControl` 重挂到新控件，可能抛“元素已有父级”。 | **不适用**：MVVM 导航不再重挂可视元素。 |
 | B8 | `SmlPackageReader.ReadBytes` | 使用 `Stream.Read` 且不校验返回值，存在短读可能；失败时在读取函数内部关闭流。 | **原样保留**。 |

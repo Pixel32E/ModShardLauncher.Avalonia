@@ -21,6 +21,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private string _statusKey = "StatusReady";
     private object?[] _statusArgs = Array.Empty<object?>();
     private string _busyKey = string.Empty;
+    private bool _catalogLoaded;
 
     public MainWindowViewModel(AppServices services)
     {
@@ -345,7 +346,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private static bool IsSameFile(string left, string right) =>
         string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
 
-    public void SaveSettings() => _services.SaveSettings();
+    public void SaveSettings()
+    {
+        if (_catalogLoaded)
+        {
+            // The enabled list is a snapshot of the current checkboxes, not an append-only log.
+            _services.Settings.EnabledMods = ModCatalog.GetEnabledModNames(_services.Catalog.Mods);
+        }
+
+        _services.SaveSettings();
+    }
 
     /// <summary>
     /// Runs the reload workflow once when the shell is shown, so the mod list is populated on
@@ -409,6 +419,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(SourcesCountDisplay));
         OnPropertyChanged(nameof(ModsStatusText));
         OnPropertyChanged(nameof(EnabledStatusText));
+        _catalogLoaded = true;
     }
 
     private async Task RunBusyAsync(string busyKey, Func<Task> action)

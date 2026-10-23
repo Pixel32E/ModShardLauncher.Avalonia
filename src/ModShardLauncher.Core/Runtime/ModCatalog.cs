@@ -110,10 +110,20 @@ public sealed class ModCatalog
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Snapshot of the currently enabled mod names for <c>Settings.json</c>. De-duplicated so a
+    /// stale list from older versions is cleaned up on the next save.
+    /// </summary>
+    public static List<string> GetEnabledModNames(IEnumerable<ModFile> mods) =>
+        mods.Where(m => m.Enabled)
+            .Select(m => m.Name)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
     /// <summary>Re-applies the enabled list persisted in <c>Settings.json</c>.</summary>
     public void ApplyEnabledMods(IEnumerable<string> names)
     {
-        foreach (string name in names)
+        foreach (string name in names.Distinct(StringComparer.Ordinal))
         {
             ModFile? modFile = _mods.Find(t => t.Name == name);
             if (modFile is not null)

@@ -10,12 +10,10 @@ namespace ModShardLauncher;
 /// </summary>
 public sealed class PatchRunner
 {
-    private readonly UserSettings? _settings;
     private readonly TextureInjector _textureInjector;
 
-    public PatchRunner(UserSettings? settings = null, TextureInjector? textureInjector = null)
+    public PatchRunner(TextureInjector? textureInjector = null)
     {
-        _settings = settings;
         _textureInjector = textureInjector ?? new TextureInjector();
     }
 
@@ -69,7 +67,6 @@ public sealed class PatchRunner
                 continue;
             }
 
-            _settings?.EnabledMods.Add(mod.Name);
             mod.PatchStatus = PatchStatus.Patching;
             Log.Information("Applying mod {Name} {Version}", mod.Name, mod.Version);
 

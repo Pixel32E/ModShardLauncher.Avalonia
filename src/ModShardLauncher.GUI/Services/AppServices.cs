@@ -73,7 +73,7 @@ public sealed class AppServices
             settingsStore,
             new GameDataService(),
             new ModCatalog(),
-            new PatchRunner(settings),
+            new PatchRunner(),
             new ModCompiler(),
             logSink,
             new DialogService());

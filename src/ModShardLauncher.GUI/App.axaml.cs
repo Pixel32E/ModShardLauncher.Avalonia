@@ -30,7 +30,7 @@ public partial class App : Application
             window.Opened += async (_, _) => await viewModel.InitializeAsync();
             window.Closing += (_, _) =>
             {
-                services.SaveSettings();
+                viewModel.SaveSettings();
                 services.Shutdown();
             };
 
