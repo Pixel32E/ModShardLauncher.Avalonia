@@ -81,8 +81,8 @@ src/ModShardLauncher.Core/
 | `TextureInjector` | PNG → 图集 → EmbeddedTexture/PageItem/Sprite/碰撞掩码 | 使用 SkiaSharp，算法与 GDI+ 版逐位对齐 |
 | `ModCompiler` | 调用 `ModShardPackerReference` 编译 `.sml` | 依赖 `ModShardLauncher.dll` 的磁盘路径 |
 | `MslContext` | 静态 API 的当前数据、菜单/署名/回调等补丁期状态 | 由宿主在补丁前后 Attach/Detach |
-| `SettingsStore` | `Settings.json` 读写 | 字段名与旧版一致 |
-| `AppPaths` | 便携目录布局 | 基于 `BaseDirectory`，CLI 可覆盖 |
+| `SettingsStore` | `Settings.json` 读写 | 字段名与旧版一致；文件位于用户数据目录 |
+| `AppPaths` | 用户数据目录布局 | 默认 `%LOCALAPPDATA%\ModShardLauncher`，CLI 可用 `--data-dir` 覆盖；首次启动迁移旧便携布局 |
 
 ## 5. 关键流程
 
@@ -130,7 +130,7 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
 ### 5.4 GUI 与 CLI 两个可执行文件
 
 - `ModShardLauncher.GUI.exe`（WinExe）→ 启动 Avalonia，不产生控制台窗口；
-- `ModShardLauncher.CLI.exe`（Exe）→ `CliApplication` 解析并执行 `patch`/`list`/`compile`/`export`，退出码 0/1/2/3，日志同时写入控制台与 `logs/cli_*.txt`。
+- `ModShardLauncher.CLI.exe`（Exe）→ `CliApplication` 解析并执行 `patch`/`list`/`compile`/`export`，退出码 0/1/2/3，日志同时写入控制台与 `%LOCALAPPDATA%\ModShardLauncher\logs\cli_*.txt`。
 
 两者都只依赖 `ModShardLauncher`（Core），发布时由 `scripts/publish.ps1` 输出到同一目录。
 ## 6. 状态与线程

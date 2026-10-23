@@ -32,7 +32,14 @@ internal static class CliApplication
             return 0;
         }
 
-        AppPaths.BaseDirectory = arguments.BaseDirectory;
+        AppPaths.DataDirectory = arguments.DataDirectory;
+
+        // An explicit --data-dir means the caller owns that folder; never pull data into it.
+        // Migrate before the logger creates the new logs folder.
+        IReadOnlyList<string> migrated = arguments.Has("data-dir") || arguments.Has("workdir")
+            ? Array.Empty<string>()
+            : AppPaths.MigratePortableLayout();
+
         AppPaths.EnsureCreated();
 
         Log.Logger = new LoggerConfiguration()
@@ -40,6 +47,12 @@ internal static class CliApplication
             .WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}")
             .WriteTo.File(Path.Combine(AppPaths.LogsDirectory, $"cli_{DateTime.Now:yyyyMMdd_HHmmss}.log"))
             .CreateLogger();
+
+        Log.Information("User data folder: {Directory}", AppPaths.DataDirectory);
+        foreach (string item in migrated)
+        {
+            Log.Information("Migrated {Item} from the portable layout", item);
+        }
 
         try
         {

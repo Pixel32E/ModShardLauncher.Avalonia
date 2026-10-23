@@ -107,6 +107,7 @@ UndertaleModTool {1}
   <data name="MenuSettings" xml:space="preserve"><value>Настройки</value></data>
   <data name="SettingsLanguageHint" xml:space="preserve"><value>Авто использует язык Windows; при отсутствии перевода используется английский.</value></data>
   <data name="SaveOverwriteSourceError" xml:space="preserve"><value>Выберите другой файл: перезапись загруженного исходного data.win запрещена.</value></data>
+  <data name="SettingsDataFolder" xml:space="preserve"><value>Данные пользователя</value></data>
   <data name="SettingsExport" xml:space="preserve"><value>Экспорт списков</value></data>
   <data name="SettingsExportHint" xml:space="preserve"><value>Если включено, при открытии data.win создаются CSV-списки предметов, оружия и брони в папке export. По умолчанию выключено.</value></data>
 </root>

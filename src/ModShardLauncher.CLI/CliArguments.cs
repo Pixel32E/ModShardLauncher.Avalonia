@@ -13,7 +13,7 @@ internal sealed class CliArguments
 
     public HashSet<string> Flags { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-    public string BaseDirectory { get; private init; } = Directory.GetCurrentDirectory();
+    public string DataDirectory { get; private init; } = AppPaths.GetDefaultDataDirectory();
 
     public bool ShowHelp => Flags.Contains("help") || Flags.Contains("h");
 
@@ -87,7 +87,10 @@ internal sealed class CliArguments
         return new CliArguments
         {
             Command = command,
-            BaseDirectory = parsed.Get("workdir") ?? Directory.GetCurrentDirectory(),
+            // --workdir is the legacy name of --data-dir and stays supported.
+            DataDirectory = parsed.Get("data-dir")
+                ?? parsed.Get("workdir")
+                ?? AppPaths.GetDefaultDataDirectory(),
         }.With(parsed);
     }
 
@@ -118,12 +121,14 @@ internal sealed class CliArguments
               ModShardLauncher.CLI.exe export  --data <vanilla.win> --type items|codes|presets
 
             Patch options:
-              --mods <dir>          Mods directory (default: <workdir>/Mods)
+              --mods <dir>          Mods directory (default: <data-dir>/Mods)
               --enable name1,name2  Enable only these mods
               --all                 Enable every installed mod
 
             Global options:
-              --workdir <dir>   Override the portable working directory (default: current directory)
+              --data-dir <dir>  Override the user data folder
+                                (default: %LOCALAPPDATA%\ModShardLauncher)
+              --workdir <dir>   Alias of --data-dir, kept for compatibility
               -h, --help        Show help
               -v, --version     Show version
             """);

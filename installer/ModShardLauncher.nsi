@@ -42,6 +42,9 @@ Unicode true
 !define CLI_EXE "ModShardLauncher.CLI.exe"
 !define SERVICE_NAME "ModShardLauncher"
 !define FIREWALL_RULE "ModShardLauncher"
+; User data lives outside the installation folder, so updating or reinstalling the
+; application never touches the user's mods, mod sources, logs or settings.
+!define USER_DATA_DIR "$LOCALAPPDATA\${PRODUCT_NAME}"
 
 Name "${PRODUCT_NAME}"
 OutFile "${OUTFILE}"
@@ -100,7 +103,7 @@ LangString SecCoreDesc    ${LANG_ENGLISH}   "ModShardLauncher GUI, CLI, the shar
 LangString SecDesktop     ${LANG_ENGLISH}   "Desktop shortcut"
 LangString SecDesktopDesc ${LANG_ENGLISH}   "Create a shortcut on the desktop."
 LangString AppRunning     ${LANG_ENGLISH}   "ModShardLauncher is running. Close it and continue?"
-LangString KeepUserData   ${LANG_ENGLISH}   "Keep your Mods, ModSources, logs and Settings.json?"
+LangString KeepUserData   ${LANG_ENGLISH}   "Keep your mods, mod sources, logs and settings? They are stored in %LOCALAPPDATA%\ModShardLauncher."
 LangString UninstallingOld ${LANG_ENGLISH}  "Removing the previous installation from:"
 LangString RunApp         ${LANG_ENGLISH}   "Launch ModShardLauncher"
 
@@ -109,7 +112,7 @@ LangString SecCoreDesc    ${LANG_SIMPCHINESE} "ModShardLauncher 图形界面、�
 LangString SecDesktop     ${LANG_SIMPCHINESE} "桌面快捷方式"
 LangString SecDesktopDesc ${LANG_SIMPCHINESE} "在桌面创建快捷方式。"
 LangString AppRunning     ${LANG_SIMPCHINESE} "ModShardLauncher 正在运行。是否关闭并继续？"
-LangString KeepUserData   ${LANG_SIMPCHINESE} "是否保留 Mods、ModSources、日志和 Settings.json？"
+LangString KeepUserData   ${LANG_SIMPCHINESE} "是否保留模组、模组源码、日志和设置？它们保存在 %LOCALAPPDATA%\ModShardLauncher。"
 LangString UninstallingOld ${LANG_SIMPCHINESE} "正在移除旧版本，位置："
 LangString RunApp         ${LANG_SIMPCHINESE} "启动 ModShardLauncher"
 
@@ -118,7 +121,7 @@ LangString SecCoreDesc    ${LANG_RUSSIAN}   "Интерфейс ModShardLauncher
 LangString SecDesktop     ${LANG_RUSSIAN}   "Ярлык на рабочем столе"
 LangString SecDesktopDesc ${LANG_RUSSIAN}   "Создать ярлык на рабочем столе."
 LangString AppRunning     ${LANG_RUSSIAN}   "ModShardLauncher запущен. Закрыть его и продолжить?"
-LangString KeepUserData   ${LANG_RUSSIAN}   "Сохранить папки Mods, ModSources, журналы и Settings.json?"
+LangString KeepUserData   ${LANG_RUSSIAN}   "Сохранить моды, исходники, журналы и настройки? Они хранятся в %LOCALAPPDATA%\ModShardLauncher."
 LangString UninstallingOld ${LANG_RUSSIAN}  "Удаление предыдущей установки из:"
 LangString RunApp         ${LANG_RUSSIAN}   "Запустить ModShardLauncher"
 
@@ -216,9 +219,8 @@ Section "$(SecCore)" SEC_CORE
   ; Never ship user data or debug symbols from the build output.
   File /r /x "Mods" /x "ModSources" /x "logs" /x "export" /x "Settings.json" /x "*.pdb" "${PUBLISH_DIR}\*.*"
 
-  CreateDirectory "$INSTDIR\Mods"
-  CreateDirectory "$INSTDIR\ModSources"
-  CreateDirectory "$INSTDIR\logs"
+  ; Mods, mod sources, logs and Settings.json belong to the user data folder, not to $INSTDIR.
+  CreateDirectory "$USER_DATA_DIR"
 
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
@@ -288,10 +290,12 @@ Section "Uninstall"
   MessageBox MB_YESNO|MB_ICONQUESTION "$(KeepUserData)" IDYES keepData
 
   RMDir /r "$INSTDIR"
+  RMDir /r "$USER_DATA_DIR"
   Goto cleanupDone
 
   keepData:
-    ; Remove every application file/folder, keep user data.
+    ; Remove every application file/folder, keep user data. The legacy entries cover an
+    ; installation that still has the pre-1.0 portable layout in $INSTDIR.
     FindFirst $R0 $R1 "$INSTDIR\*.*"
     keepLoop:
       StrCmp $R1 "" keepDone

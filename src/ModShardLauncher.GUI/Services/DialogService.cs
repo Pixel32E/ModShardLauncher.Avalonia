@@ -36,7 +36,7 @@ public sealed class DialogService
 
     /// <summary>
     /// Prefers the default Steam install of Stoneshard; when that folder does not exist the
-    /// portable working directory is used instead.
+    /// directory the application was started from is used instead.
     /// </summary>
     private async Task<IStorageFolder?> ResolveInitialFolderAsync()
     {
@@ -45,7 +45,7 @@ public sealed class DialogService
             return null;
         }
 
-        string[] candidates = [StoneshardSteamFolder, AppPaths.BaseDirectory];
+        string[] candidates = [StoneshardSteamFolder, Environment.CurrentDirectory];
         foreach (string candidate in candidates)
         {
             if (!Directory.Exists(candidate))

@@ -50,7 +50,7 @@ dotnet run --project src/ModShardLauncher.CLI -- --version
 dotnet test tests/ModShardLauncher.Tests
 ```
 
-> 便携模式：`Mods/`、`ModSources/`、`logs/`、`Settings.json` 都相对于**进程工作目录**。从发布目录启动 `ModShardLauncher.GUI.exe` 或 `ModShardLauncher.CLI.exe` 即可得到和旧版一致的便携布局。旧版 `Settings.json` 可直接复用。
+> 用户数据目录：`Settings.json`、`Mods/`、`ModSources/`、`logs/` 全部保存在 **`%LOCALAPPDATA%\ModShardLauncher`**，与安装目录分离，升级或重装程序不会改动模组和设置。旧版放在程序目录（工作目录）里的同名文件/文件夹会在首次启动时自动迁移到新目录；CLI 可用 `--data-dir` 指定其他数据目录。便携模式不再保留。
 
 ## 发布（多文件 self-contained，两个 exe 同一目录）
 
@@ -87,11 +87,12 @@ dotnet publish src/ModShardLauncher.CLI/ModShardLauncher.CLI.csproj `
 ```
 
 - 产物：`artifacts\ModShardLauncher-Setup-<version>.exe`（当前约 38 MB，LZMA 固实压缩）；
-- 默认安装到 `%LOCALAPPDATA%\Programs\ModShardLauncher`：按用户安装、无需管理员，安装目录可写，保持便携语义；
+- 默认安装到 `%LOCALAPPDATA%\Programs\ModShardLauncher`：按用户安装、无需管理员；
 - 安装/卸载界面支持中文、英文、俄文；
 - 安装前读取注册表检测旧版本，调用旧 `uninstall.exe /S` 并等待完成；
 - 静默安装：`ModShardLauncher-Setup-x.y.z.exe /S /D=C:\path`（`/D` 必须是最后一个参数）；
-- 静默卸载：`uninstall.exe /S`，默认保留 `Mods`、`ModSources`、`logs`、`Settings.json`；交互式卸载会询问是否保留；
+- 用户数据固定保存在 `%LOCALAPPDATA%\ModShardLauncher`，不在安装目录内，升级/重装不会丢失；
+- 静默卸载：`uninstall.exe /S`，默认保留用户数据目录；交互式卸载会询问是否保留；
 - 卸载会结束 GUI/CLI 进程，删除程序文件、注册表项、开始菜单/桌面快捷方式，并清理可能存在的服务与防火墙规则。
 ## CLI
 
@@ -103,7 +104,8 @@ ModShardLauncher.CLI.exe compile --source <project-dir> [--mods <dir>]
 ModShardLauncher.CLI.exe export  --data <vanilla.win> --type items|codes|presets
 
 全局选项：
-  --workdir <dir>   覆盖便携工作目录（默认当前目录）
+  --data-dir <dir>  覆盖用户数据目录（默认 %LOCALAPPDATA%\ModShardLauncher）
+  --workdir <dir>   --data-dir 的旧名称，仍兼容
   -h, --help        帮助
   -v, --version     版本
 ```
@@ -126,14 +128,17 @@ ModShardLauncher.CLI.exe compile --source .\ModSources\MyMod
 
 ## 目录与设置
 
+用户数据目录（`%LOCALAPPDATA%` 即 `C:\Users\<用户>\AppData\Local`）：
+
 ```
-<工作目录>/
-├─ data.win              # 任意位置的原版数据文件
+%LOCALAPPDATA%\ModShardLauncher\
 ├─ Settings.json         # Language / LanguageChosen / EnableLogger / ExportManifests / EnabledMods
 ├─ Mods/                 # *.sml 模组包
 ├─ ModSources/           # C# 模组工程（含 .csproj 的子目录）
 └─ logs/                 # 文件日志（Serilog），GUI 底部日志面板同步显示
 ```
+
+`data.win` 不在这里：它可以是任意位置的原版数据文件，由“打开”对话框选择。设置页会显示上述目录并提供“打开”按钮。
 
 ## 本地化
 

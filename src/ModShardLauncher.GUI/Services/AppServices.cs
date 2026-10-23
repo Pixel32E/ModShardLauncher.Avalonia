@@ -50,10 +50,10 @@ public sealed class AppServices
 
     public static AppServices Create()
     {
+        // Migrate before the logger and the settings store touch the new folder, otherwise the
+        // freshly created log file would make the legacy logs folder look like a conflict.
+        IReadOnlyList<string> migrated = AppPaths.MigratePortableLayout();
         AppPaths.EnsureCreated();
-
-        SettingsStore settingsStore = new();
-        UserSettings settings = settingsStore.Load();
 
         UiLogSink logSink = new();
         Log.Logger = new LoggerConfiguration()
@@ -61,6 +61,15 @@ public sealed class AppServices
             .WriteTo.File(Path.Combine(AppPaths.LogsDirectory, $"log_{DateTime.Now:yyyyMMdd_HHmm}.txt"))
             .WriteTo.Sink(logSink)
             .CreateLogger();
+
+        Log.Information("Using user data folder {Directory}", AppPaths.DataDirectory);
+        foreach (string item in migrated)
+        {
+            Log.Information("Migrated {Item} from the portable layout", item);
+        }
+
+        SettingsStore settingsStore = new();
+        UserSettings settings = settingsStore.Load();
 
         string culture = settings.LanguageChosen
             ? LocalizationService.CultureFor(settings.Language)

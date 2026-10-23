@@ -190,11 +190,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     public string ExportLabel => LocalizationService.Instance["SettingsExport"];
     public string ExportHint => LocalizationService.Instance["SettingsExportHint"];
     public string FoldersLabel => LocalizationService.Instance["SettingsPaths"];
+    public string DataFolderLabel => LocalizationService.Instance["SettingsDataFolder"];
     public string ModsFolderLabel => LocalizationService.Instance["SettingsModsFolder"];
     public string SourcesFolderLabel => LocalizationService.Instance["SettingsSourcesFolder"];
     public string LogsFolderLabel => LocalizationService.Instance["SettingsLogsFolder"];
     public string OpenLabel => LocalizationService.Instance["SettingsOpen"];
     public string AboutLabel => LocalizationService.Instance["SettingsAbout"];
+    public string DataFolder => AppPaths.DataDirectory;
     public string ModsFolder => AppPaths.ModsDirectory;
     public string SourcesFolder => AppPaths.ModSourcesDirectory;
     public string LogsFolder => AppPaths.LogsDirectory;
@@ -234,6 +236,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenDataFolder() => _main.OpenFolder(AppPaths.DataDirectory);
+
+    [RelayCommand]
     private void OpenModsFolder() => _main.OpenFolder(AppPaths.ModsDirectory);
 
     [RelayCommand]
@@ -255,6 +260,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(ExportLabel));
         OnPropertyChanged(nameof(ExportHint));
         OnPropertyChanged(nameof(FoldersLabel));
+        OnPropertyChanged(nameof(DataFolderLabel));
         OnPropertyChanged(nameof(ModsFolderLabel));
         OnPropertyChanged(nameof(SourcesFolderLabel));
         OnPropertyChanged(nameof(LogsFolderLabel));

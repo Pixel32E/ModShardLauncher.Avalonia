@@ -48,6 +48,14 @@
 
           <Grid ColumnDefinitions="*,Auto">
             <StackPanel Spacing="2">
+              <TextBlock Text="{Binding DataFolderLabel}" />
+              <TextBlock Text="{Binding DataFolder}" Classes="caption" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <Button Grid.Column="1" Content="{Binding OpenLabel}" Command="{Binding OpenDataFolderCommand}" />
+          </Grid>
+
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="2">
               <TextBlock Text="{Binding ModsFolderLabel}" />
               <TextBlock Text="{Binding ModsFolder}" Classes="caption" TextTrimming="CharacterEllipsis" />
             </StackPanel>
