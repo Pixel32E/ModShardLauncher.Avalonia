@@ -135,45 +135,94 @@ public static class ModInterfaceServer
             return;
         }
 
-        Socket client = server.EndAccept(result);
-        _client = client;
-
-        while (client.Connected)
+        Socket client;
+        try
         {
-            // NOTE: deferred defect B4 from the analysis (busy wait); behaviour kept as-is
-            // during the port so the protocol stays bit-for-bit identical.
-            if (client.Available == 0)
-            {
-                continue;
-            }
+            client = server.EndAccept(result);
+        }
+        catch (ObjectDisposedException)
+        {
+            return;
+        }
+        catch (SocketException)
+        {
+            return;
+        }
 
+        _client = client;
+        try
+        {
             byte[] received = new byte[1024 * 64];
-            int read = client.Receive(received, received.Length, 0);
-            int callbackId = BitConverter.ToInt32(received.Take(4).ToArray());
-            string message = Encoding.UTF8.GetString(received, 4, read - 4).Replace("\0", "");
+            while (true)
+            {
+                int read;
+                try
+                {
+                    // Blocking receive on the dedicated listener thread. This replaces the old
+                    // Available == 0 spin loop (defect B4) with a proper wait.
+                    read = client.Receive(received, 0, received.Length, SocketFlags.None);
+                }
+                catch (SocketException)
+                {
+                    break;
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
 
-            if (message.StartsWith("[MSG]"))
-            {
-                Report("[Client]: " + message.Replace("[MSG]", ""));
-            }
-            else if (message.StartsWith("[CLB]"))
-            {
-                string data = message.Replace("[CLB]", "");
-                if (ModInterfaceEngine.Instance.Callbacks.TryGetValue(callbackId, out Action<string>? callback))
+                if (read <= 0)
                 {
-                    callback(data);
-                    ModInterfaceEngine.Instance.Callbacks.Remove(callbackId);
+                    break;
+                }
+
+                if (read < 4)
+                {
+                    continue;
+                }
+
+                int callbackId = BitConverter.ToInt32(received, 0);
+                string message = Encoding.UTF8.GetString(received, 4, read - 4).Replace("\0", "");
+
+                if (message.StartsWith("[MSG]"))
+                {
+                    Report("[Client]: " + message.Replace("[MSG]", ""));
+                }
+                else if (message.StartsWith("[CLB]"))
+                {
+                    string data = message.Replace("[CLB]", "");
+                    if (ModInterfaceEngine.Instance.Callbacks.TryGetValue(callbackId, out Action<string>? callback))
+                    {
+                        callback(data);
+                        ModInterfaceEngine.Instance.Callbacks.Remove(callbackId);
+                    }
+                }
+                else if (message.StartsWith("[HOK]"))
+                {
+                    string[] data = message.Replace("[HOK]", "").Split("<BUILTIN>");
+                    string[] hookInfo = data[0].Split("<EXTRAMSG>");
+                    string[] parameters = hookInfo.Length > 1 ? hookInfo[1].Split(" ") : Array.Empty<string>();
+                    if (data.Length > 1 && data[1] == "1")
+                    {
+                        ModInterfaceEngine.Instance.DoHook(data[0], parameters);
+                    }
                 }
             }
-            else if (message.StartsWith("[HOK]"))
+        }
+        finally
+        {
+            try
             {
-                string[] data = message.Replace("[HOK]", "").Split("<BUILTIN>");
-                string[] hookInfo = data[0].Split("<EXTRAMSG>");
-                string[] parameters = hookInfo.Length > 1 ? hookInfo[1].Split(" ") : Array.Empty<string>();
-                if (data.Length > 1 && data[1] == "1")
-                {
-                    ModInterfaceEngine.Instance.DoHook(data[0], parameters);
-                }
+                client.Close();
+            }
+            catch
+            {
+                // Already gone.
+            }
+
+            if (ReferenceEquals(_client, client))
+            {
+                _client = null;
             }
         }
     }
