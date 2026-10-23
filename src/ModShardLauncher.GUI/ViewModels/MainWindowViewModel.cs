@@ -422,23 +422,40 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _busyKey = busyKey;
         BusyText = LocalizationService.Instance[busyKey];
 
+        Exception? failure = null;
         try
         {
             await action();
         }
         catch (Exception ex)
         {
+            failure = ex;
             Log.Error(ex, "The operation failed");
-            await _services.Dialogs.ShowErrorAsync(
-                LocalizationService.Instance["DialogErrorTitle"],
-                ex.Message,
-                ex.ToString());
             SetStatus("StatusFailed");
         }
         finally
         {
+            // Always leave the busy state before any dialog is shown, so a failed operation can
+            // never leave the progress overlay covering the window.
             IsBusy = false;
             BusyText = string.Empty;
+            _busyKey = string.Empty;
+        }
+
+        if (failure is not null)
+        {
+            try
+            {
+                await _services.Dialogs.ShowErrorAsync(
+                    LocalizationService.Instance["DialogErrorTitle"],
+                    failure.Message,
+                    failure.ToString());
+            }
+            catch (Exception dialogException)
+            {
+                // A broken dialog must not crash the command; the failure is already logged.
+                Log.Error(dialogException, "Cannot display the error dialog");
+            }
         }
     }
 
