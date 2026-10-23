@@ -24,6 +24,12 @@ public sealed class GameDataService
 
     public bool IsLoaded => _data is not null;
 
+    /// <summary>
+    /// Opt-in (default off): write the item/weapon/armor CSV manifests after a successful load.
+    /// The CLI <c>export</c> command remains available for explicit exports.
+    /// </summary>
+    public bool ExportManifests { get; set; }
+
     public void Reset()
     {
         MslContext.Detach();
@@ -82,7 +88,12 @@ public sealed class GameDataService
 
         GameTableCodec.Initialize();
         LootTableRegistry.ResetLootTables();
-        data.Export(DataType.Items);
+
+        if (ExportManifests)
+        {
+            data.Export(DataType.Items);
+            Log.Information("Wrote item/weapon/armor manifests to the export folder");
+        }
     }
 
     private void SaveCore(string path)

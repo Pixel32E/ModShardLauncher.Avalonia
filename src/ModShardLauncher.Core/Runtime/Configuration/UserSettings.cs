@@ -16,6 +16,9 @@ public class UserSettings
 
     public bool EnableLogger = true;
 
+    /// <summary>When enabled, loading data.win also writes the item/weapon/armor CSV manifests.</summary>
+    public bool ExportManifests = false;
+
     public List<string> EnabledMods = new();
 }
 

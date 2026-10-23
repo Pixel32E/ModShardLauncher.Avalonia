@@ -166,6 +166,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             ? Languages.FirstOrDefault(x => x.Culture == LocalizationService.Instance.Culture.Name) ?? Languages[1]
             : Languages[0];
         _enableLogger = main.Settings.EnableLogger;
+        _exportManifests = main.Settings.ExportManifests;
     }
 
     public MainWindowViewModel Main => _main;
@@ -178,11 +179,16 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _enableLogger;
 
+    [ObservableProperty]
+    private bool _exportManifests;
+
     public string SettingsTitle => LocalizationService.Instance["SettingsTitle"];
     public string LanguageLabel => LocalizationService.Instance["SettingsLanguage"];
     public string LanguageHint => LocalizationService.Instance["SettingsLanguageHint"];
     public string LoggerLabel => LocalizationService.Instance["SettingsLogger"];
     public string LoggerHint => LocalizationService.Instance["SettingsLoggerHint"];
+    public string ExportLabel => LocalizationService.Instance["SettingsExport"];
+    public string ExportHint => LocalizationService.Instance["SettingsExportHint"];
     public string FoldersLabel => LocalizationService.Instance["SettingsPaths"];
     public string ModsFolderLabel => LocalizationService.Instance["SettingsModsFolder"];
     public string SourcesFolderLabel => LocalizationService.Instance["SettingsSourcesFolder"];
@@ -220,6 +226,13 @@ public sealed partial class SettingsViewModel : ObservableObject
         _main.SaveSettings();
     }
 
+    partial void OnExportManifestsChanged(bool value)
+    {
+        _main.Settings.ExportManifests = value;
+        _main.Services.GameData.ExportManifests = value;
+        _main.SaveSettings();
+    }
+
     [RelayCommand]
     private void OpenModsFolder() => _main.OpenFolder(AppPaths.ModsDirectory);
 
@@ -239,6 +252,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(LanguageHint));
         OnPropertyChanged(nameof(LoggerLabel));
         OnPropertyChanged(nameof(LoggerHint));
+        OnPropertyChanged(nameof(ExportLabel));
+        OnPropertyChanged(nameof(ExportHint));
         OnPropertyChanged(nameof(FoldersLabel));
         OnPropertyChanged(nameof(ModsFolderLabel));
         OnPropertyChanged(nameof(SourcesFolderLabel));

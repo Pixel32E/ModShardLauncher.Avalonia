@@ -107,4 +107,6 @@ Not affiliated with Ink Stains Games.</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>Settings</value></data>
   <data name="SettingsLanguageHint" xml:space="preserve"><value>Auto follows the Windows display language; languages without a translation fall back to English.</value></data>
   <data name="SaveOverwriteSourceError" xml:space="preserve"><value>Choose a different output file: overwriting the loaded vanilla data.win is not allowed.</value></data>
+  <data name="SettingsExport" xml:space="preserve"><value>Export manifests</value></data>
+  <data name="SettingsExportHint" xml:space="preserve"><value>When enabled, opening data.win also writes item, weapon and armor CSV lists to the export folder. Off by default.</value></data>
 </root>

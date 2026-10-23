@@ -13,6 +13,7 @@
 - 完整保留 `Msl` modding API（命名空间、类型、方法签名不变）；程序集版本固定为 `1.0.0.0`，旧 `.sml` 通过独立 `AssemblyLoadContext` 按简单名绑定宿主 API，无需重新编译。
 - 现代 IDE 风格界面：顶部菜单 + 工具栏 + 左侧导航 + 底部固定高度日志面板（实时显示补丁过程，不可拖拽调整）+ 状态栏。
 - 中 / 英 / 俄三语，采用标准 `.resx` + satellite assemblies；默认跟随 Windows 显示语言，没有对应翻译时回退英文，可在设置中固定语言。
+- 设置中可选“导出清单”（默认关闭）：开启后每次打开 `data.win` 会生成物品、武器、护甲 CSV；CLI 的 `export` 命令始终可用。
 - 独立 CLI：批量打补丁、列出模组、编译模组、导出数据，便于 CI 和服务器使用。
 
 ## 解决方案结构
@@ -128,7 +129,7 @@ ModShardLauncher.CLI.exe compile --source .\ModSources\MyMod
 ```
 <工作目录>/
 ├─ data.win              # 任意位置的原版数据文件
-├─ Settings.json         # 与旧版同名字段：Language / LanguageChosen / EnableLogger / EnabledMods
+├─ Settings.json         # Language / LanguageChosen / EnableLogger / ExportManifests / EnabledMods
 ├─ Mods/                 # *.sml 模组包
 ├─ ModSources/           # C# 模组工程（含 .csproj 的子目录）
 └─ logs/                 # 文件日志（Serilog），GUI 底部日志面板同步显示
@@ -143,12 +144,10 @@ ModShardLauncher.CLI.exe compile --source .\ModSources\MyMod
 
 ## 已知问题
 
-本次重构以**功能对等迁移**为第一目标，分析报告中 5.1 节列出的部分历史缺陷仍保留（详见 [`docs/deferred-bugs.md`](docs/deferred-bugs.md)），包括：
+分析报告 5.1 节列出的历史缺陷大部分已修复并有回归测试（B1、B2、B4、B5、B6）；B3 在 Windows-only 目标下不适用。仍保留（详见 [`docs/deferred-bugs.md`](docs/deferred-bugs.md)）：
 
-- 每次打补丁都会向 `Settings.EnabledMods` 追加记录；
-- 打开数据文件时自动导出 `export/` 的副作用；
-- 模组接口服务器的忙等循环；
-- `.sml` 读取时可能出现的短读。
+- `.sml` 读取时可能出现的短读（B8）；
+- 单个模组加载异常可能中断整批扫描（B9）。
 
 此外，`UndertaleModTool` 的二进制依赖仍按原样冻结；其 `Magick.NET` 传递依赖未随发布输出，若走到需要 ImageMagick 的代码路径可能失败，后续单独处理。
 

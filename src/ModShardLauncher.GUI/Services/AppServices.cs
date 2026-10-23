@@ -79,6 +79,7 @@ public sealed class AppServices
             new DialogService());
 
         services.ApplyLogLevel();
+        services.GameData.ExportManifests = settings.ExportManifests;
 
         Log.Information("Launching msl {{{0}}} using UTMT {{{1}}}", AppInfo.MslVersion, AppInfo.UtmtLibVersion);
 
