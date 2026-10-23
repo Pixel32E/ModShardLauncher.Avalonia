@@ -22,6 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The tests assert the weapon table schema and the row the API builds for it. -->
+    <InternalsVisibleTo Include="ModShardLauncher.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- UndertaleModTool binaries are frozen. UndertaleModTool.dll is kept in the output for mods that
          still reference its types at runtime, but launcher code must not call its WPF-dependent
          members (see docs/architecture.md, "旧模组二进制兼容层"). -->

@@ -78,6 +78,10 @@ public sealed class PatchRunner
 
             _textureInjector.Inject(mod);
             mod.instance?.PatchMod();
+            if (mod.instance is not null)
+            {
+                InjectDeclaredWeapons(mod.instance);
+            }
             mod.PatchStatus = PatchStatus.Success;
             Log.Information("Mod {Name} patched", mod.Name);
             LogModStatus(mod);
@@ -89,6 +93,18 @@ public sealed class PatchRunner
             MslContext.Credits.SelectMany(x => x.Item2).Distinct().ToArray());
         Msl.ChainDisclaimerRooms(MslContext.Disclaimers);
         Msl.CreateMenu(MslContext.Menus);
+    }
+
+    /// <summary>
+    /// Adds the weapons a mod declared in <see cref="Mod.ModWeapons"/>. Each entry becomes one
+    /// weapons-table row plus its equipment-table name/description/gender rows.
+    /// </summary>
+    private static void InjectDeclaredWeapons(Mod instance)
+    {
+        foreach (Weapon weapon in instance.ModWeapons)
+        {
+            Msl.AddWeapon(weapon);
+        }
     }
 
     /// <summary>Writes the per-mod patch result to the log (same message as the WPF build).</summary>

@@ -27,7 +27,7 @@
 
 > **重要**：Core 的程序集名必须是 `ModShardLauncher`。已发布的 `.sml` 内部程序集引用了这个程序集名，改名会让所有历史模组失效。
 
-详细设计与兼容性约定见 [`docs/architecture.md`](docs/architecture.md)。
+详细设计与兼容性约定见 [`docs/architecture.md`](docs/architecture.md)；从头写一个模组见 [`docs/modding-guide.md`](docs/modding-guide.md)（含可编译示例、武器表/装备表写法与已知缺陷）。
 
 ## 环境要求
 
@@ -150,6 +150,8 @@ ModShardLauncher.CLI.exe compile --source .\ModSources\MyMod
 ## 已知问题
 
 分析报告 5.1 节列出的历史缺陷已全部修复或确认不适用，并有回归测试覆盖（B1、B2、B4、B5、B6、B8、B9；B3 为 Windows-only 目标下不适用）。
+
+武器表 API 已对齐当前游戏的 84 列结构：`Weapon` / `CloneDefaults` / `GetWeapon` / `SetWeapon` / `ModWeapons` / `InjectTableWeapons` 都能正常读写武器表与装备描述表，并由 `WeaponTableTests`、`WeaponApiTests` 锁定（旧版“这些 API 会写坏数据、只能手改表”的限制不再适用）。
 
 此外，`UndertaleModTool` 的二进制依赖仍按原样冻结；其 `Magick.NET` 传递依赖未随发布输出，若走到需要 ImageMagick 的代码路径可能失败，后续单独处理。
 

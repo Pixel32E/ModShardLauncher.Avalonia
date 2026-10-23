@@ -40,7 +40,12 @@ public static class GameTableCodec
         }
     }
 
-    /// <summary>Replaces the table stored in the script <paramref name="name"/>.</summary>
+    /// <summary>
+    /// Replaces the table stored in the script <paramref name="name"/>. The legacy snapshot lists
+    /// (<see cref="ModLoader.Weapons"/> / <see cref="ModLoader.WeaponDescriptions"/>) are pointed at
+    /// the list that was just written, so <see cref="Msl.SetWeapon"/> and friends never observe a
+    /// stale copy of the table.
+    /// </summary>
     public static void SetTable(List<string> table, string name)
     {
         string serialized = JsonConvert.SerializeObject(table).Replace("\n", "");
@@ -50,6 +55,20 @@ public static class GameTableCodec
         text = Regex.Replace(text, "\\[.*\\]", serialized);
         target.ReplaceGML(text, MslContext.Data);
 
+        SyncSnapshot(table, name);
         Log.Information("Successfully set table: {0}", name);
+    }
+
+    /// <summary>Keeps the public table snapshots in step with what was written to the data file.</summary>
+    private static void SyncSnapshot(List<string> table, string name)
+    {
+        if (name == "gml_GlobalScript_table_weapons")
+        {
+            ModLoader.Weapons = table;
+        }
+        else if (name == "gml_GlobalScript_table_equipment")
+        {
+            ModLoader.WeaponDescriptions = table;
+        }
     }
 }

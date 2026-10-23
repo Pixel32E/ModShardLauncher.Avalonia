@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
+using ModShardLauncher.Mods;
 using Serilog;
 
 namespace ModShardLauncher;
@@ -180,18 +181,108 @@ public partial class Msl
         bool NoDrop = false
         )
     {
-        // Table filename
-        const string tableName = "gml_GlobalScript_table_weapons";
-        
-        // Load table if it exists
-        List<string> table = ThrowIfNull(GameTableCodec.GetTable(tableName));
-        
-        // Prepare line
-        string newline = $"{name};{GetEnumMemberValue(Tier)};{id};{GetEnumMemberValue(Slot)};{rarity};{Mat};{Price};{Markup};{MaxDuration};{Rng};;{Armor_Piercing};{Armor_Damage};{Bodypart_Damage};;{Slashing_Damage};{Piercing_Damage};{Blunt_Damage};{Rending_Damage};{Fire_Damage};{Shock_Damage};{Poison_Damage};{Caustic_Damage};{Frost_Damage};{Arcane_Damage};{Unholy_Damage};{Sacred_Damage};{Psionic_Damage};;{FMB};{Hit_Chance};{CRT};{CRTD};{CTA};{PRR};{Block_Power};{Block_Recovery};;{Bleeding_Chance};{Daze_Chance};{Stun_Chance};{Knockback_Chance};{Immob_Chance};{Stagger_Chance};;{MP};{MP_Restoration};{Cooldown_Reduction};{Skills_Energy_Cost};{Spells_Energy_Cost};{Magic_Power};{Miscast_Chance};{Miracle_Chance};{Miracle_Power};{Bonus_Range};;{max_hp};{Health_Restoration};{Healing_Received};{Crit_Avoid};{Fatigue_Gain};{Lifesteal};{Manasteal};{Damage_Received};;{Pyromantic_Power};{Geomantic_Power};{Venomantic_Power};{Electroantic_Power};{Cryomantic_Power};{Arcanistic_Power};{Astromantic_Power};{Psimantic_Power};;{Balance};{GetEnumMemberValue(tags)};{upgrade};{(fireproof ? 1 : "")};{(NoDrop ? 1 : "")};";
-        
-        // Add line to table
-        table.Add(newline);
-        GameTableCodec.SetTable(table, tableName);
-        Log.Information("Injected Weapon {0} into table {1}", id, tableName);
+        // The row is built from the live table header (see Weapon.Columns) instead of a hard-coded
+        // format string, so it always has the same number of cells as the table it is appended to.
+        Weapon weapon = new()
+        {
+            Name = name,
+            Tier = GetEnumMemberValue(Tier),
+            ID = id,
+            Slot = GetEnumMemberValue(Slot),
+            Subtype = DefaultSubtype(Slot),
+            Rare = rarity.ToString(),
+            Material = Mat.ToString(),
+            Price = Price ?? 0,
+            Markup = Markup,
+            MaxDuration = MaxDuration ?? 0,
+            Rng = Rng,
+            ArmorPiercing = Armor_Piercing ?? 0,
+            ArmorDamage = Armor_Damage ?? 0,
+            BodypartDamage = Bodypart_Damage ?? 0,
+            SlashingDamage = Slashing_Damage ?? 0,
+            PiercingDamage = Piercing_Damage ?? 0,
+            BluntDamage = Blunt_Damage ?? 0,
+            RendingDamage = Rending_Damage ?? 0,
+            FireDamage = Fire_Damage ?? 0,
+            ShockDamage = Shock_Damage ?? 0,
+            PoisonDamage = Poison_Damage ?? 0,
+            CausticDamage = Caustic_Damage ?? 0,
+            FrostDamage = Frost_Damage ?? 0,
+            ArcaneDamage = Arcane_Damage ?? 0,
+            UnholyDamage = Unholy_Damage ?? 0,
+            SacredDamage = Sacred_Damage ?? 0,
+            PsionicDamage = Psionic_Damage ?? 0,
+            FMB = FMB ?? 0,
+            HitChance = Hit_Chance ?? 0,
+            CRT = CRT ?? 0,
+            CRTD = CRTD ?? 0,
+            CTA = CTA ?? 0,
+            PRR = PRR ?? 0,
+            BlockPower = Block_Power ?? 0,
+            BlockRecovery = Block_Recovery ?? 0,
+            BleedingChance = Bleeding_Chance ?? 0,
+            DazeChance = Daze_Chance ?? 0,
+            StunChance = Stun_Chance ?? 0,
+            KnockbackChance = Knockback_Chance ?? 0,
+            ImmobChance = Immob_Chance ?? 0,
+            StaggerChance = Stagger_Chance ?? 0,
+            MP = MP ?? 0,
+            MPRestoration = MP_Restoration ?? 0,
+            CooldownReduction = Cooldown_Reduction ?? 0,
+            SkillsEnergyCost = Skills_Energy_Cost ?? 0,
+            SpellsEnergyCost = Spells_Energy_Cost ?? 0,
+            MagicPower = Magic_Power ?? 0,
+            MiscastChance = Miscast_Chance ?? 0,
+            MiracleChance = Miracle_Chance ?? 0,
+            MiraclePower = Miracle_Power ?? 0,
+            BonusRange = Bonus_Range ?? 0,
+            MaxHp = max_hp ?? 0,
+            HealthRestoration = Health_Restoration ?? 0,
+            HealingReceived = Healing_Received ?? 0,
+            CritAvoid = Crit_Avoid ?? 0,
+            FatigueGain = Fatigue_Gain ?? 0,
+            Lifesteal = Lifesteal ?? 0,
+            Manasteal = Manasteal ?? 0,
+            DamageReceived = Damage_Received ?? 0,
+            PyromanticPower = Pyromantic_Power ?? 0,
+            GeomanticPower = Geomantic_Power ?? 0,
+            VenomanticPower = Venomantic_Power ?? 0,
+            ElectromanticPower = Electroantic_Power ?? 0,
+            CryomanticPower = Cryomantic_Power ?? 0,
+            ArcanisticPower = Arcanistic_Power ?? 0,
+            AstromanticPower = Astromantic_Power ?? 0,
+            PsimanticPower = Psimantic_Power ?? 0,
+            Balance = Balance ?? 0,
+            tags = GetEnumMemberValue(tags),
+            Upgrade = upgrade ?? "",
+            Fireproof = fireproof ? 1 : 0,
+            NoDrop = NoDrop ? "1" : "",
+        };
+
+        if (AppendWeaponRow(weapon))
+        {
+            Log.Information("Injected Weapon {0} into table {1}", id, WeaponsTableName);
+        }
     }
+
+    /// <summary>
+    /// Default <c>Subtype</c> for a slot: the subtype the most vanilla weapons of that slot use.
+    /// Use <see cref="Msl.AddWeapon(Weapon)"/> when an exact subtype is needed.
+    /// </summary>
+    private static string DefaultSubtype(WeaponsSlot slot) => slot switch
+    {
+        WeaponsSlot.sword => "sword",
+        WeaponsSlot.axe => "axe",
+        WeaponsSlot.mace => "mace",
+        WeaponsSlot.dagger => "dagger",
+        WeaponsSlot.twohandedsword => "2hsword",
+        WeaponsSlot.spear => "spear",
+        WeaponsSlot.twohandedaxe => "poleaxe",
+        WeaponsSlot.twohandedmace => "polehammer",
+        WeaponsSlot.bow => "shortbow",
+        WeaponsSlot.crossbow => "lightcrossbow",
+        WeaponsSlot.sling => "sling",
+        WeaponsSlot.twohandedstaff => "magestaff",
+        _ => "",
+    };
 }
