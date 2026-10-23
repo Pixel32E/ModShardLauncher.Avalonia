@@ -12,7 +12,7 @@
 | B6 | `GameDataService.LoadCore` | 每次加载 `data.win` 都调用 `data.Export(DataType.Items)`，删除并重建工作目录下的 `export/`。 | **已修复并回归**：改为设置项 `ExportManifests`（默认关闭）。仅当用户开启时，加载成功后才导出；CLI 的 `export` 命令仍可显式导出。新增 `ManifestExportSettingsTests`。 |
 | B7 | — | 旧版 `Main.Refresh()` 把控件从旧 `ContentControl` 重挂到新控件，可能抛“元素已有父级”。 | **不适用**：MVVM 导航不再重挂可视元素。 |
 | B8 | `SmlPackageReader.ReadBytes` | 使用 `Stream.Read` 且不校验返回值，存在短读可能；失败时在读取函数内部关闭流。 | **已修复并回归**：改用 `ReadExactly`，短读抛 `EndOfStreamException`；负长度、异常 chunk 数量/名称长度、越界 chunk 抛 `InvalidDataException`；helper 不再关闭流，`ModFile.GetFile` 用 `finally` 统一关闭并校验偏移。新增 `SmlPackageReaderTests`（截断头、负 chunk 数、越界 chunk、魔数不匹配）。 |
-| B9 | `ModCatalog.Reload` | 仅对 `.sml` 读取做 try/catch；`GetTypes()`/`Activator.CreateInstance` 异常会中断整批加载。 | **原样保留**。 |
+| B9 | `ModCatalog.Reload` | 仅对 `.sml` 读取做 try/catch；`GetTypes()`/`Activator.CreateInstance` 异常会中断整批加载。 | **已修复并回归**：读包、`GetTypes`、`Activator`、`LoadAssembly` 全部纳入单模组 try/catch；`ReflectionTypeLoadException` 时用 `ex.Types` 尝试找部分可加载的 `Mod` 子类，并把 `LoaderExceptions` 摘要写入 `LoadErrors`；失败只跳过该模组，扫描继续。新增 `ModCatalogIsolationTests`（好模组 + 构造函数抛异常的坏模组，断言好模组仍加载、错误含文件名与原因）。 |
 | B10 | `ModInterfaceServer.Stop` | 旧版关闭窗口时直接 `Server.Close()`，可能 NRE。 | 为满足 nullable 编译做了**空安全最小加固**，行为不变。 |
 
 ## 其他已知风险（未在分析报告中列为 5.1）

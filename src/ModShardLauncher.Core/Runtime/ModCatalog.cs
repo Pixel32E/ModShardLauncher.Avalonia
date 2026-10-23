@@ -1,3 +1,4 @@
+using System.Reflection;
 using ModShardLauncher.Mods;
 using Serilog;
 
@@ -57,52 +58,49 @@ public sealed class ModCatalog
         List<ModFile> loaded = new();
         foreach (string file in Directory.GetFiles(_modsDirectory, "*.sml"))
         {
-            ModFile? modFile = null;
+            string fileName = Path.GetFileName(file);
             try
             {
-                modFile = SmlPackageReader.Read(file);
+                ModFile? modFile = SmlPackageReader.Read(file);
+                if (modFile?.Assembly is null)
+                {
+                    continue;
+                }
+
+                Type? modType = FindModType(modFile.Assembly, fileName);
+                if (modType is null)
+                {
+                    ReportLoadError($"Loading error: {fileName} ({modFile.Assembly.GetName().Name}) has no Mod subclass");
+                    continue;
+                }
+
+                if (Activator.CreateInstance(modType) is not Mod mod)
+                {
+                    ReportLoadError($"Loading error: {fileName} cannot create {modType.FullName}");
+                    continue;
+                }
+
+                mod.LoadAssembly();
+                mod.ModFiles = modFile;
+                modFile.instance = mod;
+                modFile.ReloadRequested = Reload;
+
+                ModFile? previous = _mods.Find(t => t.Name == modFile.Name);
+                if (previous is not null)
+                {
+                    modFile.Enabled = previous.Enabled;
+                }
+
+                loaded.Add(modFile);
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                ReportLoadError($"Loading error: {fileName}: {SummarizeLoaderExceptions(ex)}", ex);
             }
             catch (Exception ex)
             {
-                Log.Information(ex, "Cannot read the mod {0}", file);
+                ReportLoadError($"Loading error: {fileName}: {DescribeException(ex)}", ex);
             }
-
-            if (modFile is null)
-            {
-                continue;
-            }
-
-            if (modFile.Assembly is null)
-            {
-                continue;
-            }
-
-            Type? modType = Array.Find(modFile.Assembly.GetTypes(), t => t.IsSubclassOf(typeof(Mod)));
-            if (modType is null)
-            {
-                string message = $"Loading error: {modFile.Assembly.GetName().Name} This Mod need a Mod class";
-                _loadErrors.Add(message);
-                Log.Error(message);
-                continue;
-            }
-
-            if (Activator.CreateInstance(modType) is not Mod mod)
-            {
-                continue;
-            }
-
-            mod.LoadAssembly();
-            mod.ModFiles = modFile;
-            modFile.instance = mod;
-            modFile.ReloadRequested = Reload;
-
-            ModFile? previous = _mods.Find(t => t.Name == modFile.Name);
-            if (previous is not null)
-            {
-                modFile.Enabled = previous.Enabled;
-            }
-
-            loaded.Add(modFile);
         }
 
         _mods.Clear();
@@ -114,6 +112,59 @@ public sealed class ModCatalog
     /// Snapshot of the currently enabled mod names for <c>Settings.json</c>. De-duplicated so a
     /// stale list from older versions is cleaned up on the next save.
     /// </summary>
+    /// <summary>Locates the Mod entry point, tolerating partially loadable assemblies.</summary>
+    private static Type? FindModType(Assembly assembly, string fileName)
+    {
+        try
+        {
+            return Array.Find(assembly.GetTypes(), t => t.IsSubclassOf(typeof(Mod)));
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            Type? modType = ex.Types.FirstOrDefault(t => t is not null && t.IsSubclassOf(typeof(Mod)));
+            if (modType is not null)
+            {
+                Log.Warning("Some types in {File} could not be loaded: {Summary}", fileName, SummarizeLoaderExceptions(ex));
+                return modType;
+            }
+
+            throw;
+        }
+    }
+
+    private static string SummarizeLoaderExceptions(ReflectionTypeLoadException ex)
+    {
+        IEnumerable<string> messages = ex.LoaderExceptions
+            .Where(e => e is not null)
+            .Select(e => e!.Message)
+            .Distinct(StringComparer.Ordinal)
+            .Take(3);
+
+        string summary = string.Join(" | ", messages);
+        return summary.Length == 0 ? "unknown type load failure" : summary;
+    }
+
+    private static string DescribeException(Exception ex)
+    {
+        // Constructor failures surface as TargetInvocationException; report the real cause.
+        Exception actual = ex is TargetInvocationException { InnerException: not null } invocation
+            ? invocation.InnerException!
+            : ex;
+        return $"{actual.GetType().Name}: {actual.Message}";
+    }
+
+    private void ReportLoadError(string message, Exception? exception = null)
+    {
+        _loadErrors.Add(message);
+        if (exception is null)
+        {
+            Log.Error(message);
+        }
+        else
+        {
+            Log.Error(exception, message);
+        }
+    }
     public static List<string> GetEnabledModNames(IEnumerable<ModFile> mods) =>
         mods.Where(m => m.Enabled)
             .Select(m => m.Name)
