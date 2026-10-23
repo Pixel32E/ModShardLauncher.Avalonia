@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using ModShardLauncher.Mods;
@@ -14,10 +13,12 @@ namespace ModShardLauncher;
 public static class SmlPackageReader
 {
     private const string Magic = "MSLM";
+    private const int MaxChunkNameLength = 4096;
+    private const int MaxChunksPerTable = 100_000;
 
     public static ModFile? Read(string path)
     {
-        FileStream stream = new(path, FileMode.Open);
+        using FileStream stream = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         string modName = Path.GetFileNameWithoutExtension(path);
 
         ModFile file = new()
@@ -28,7 +29,6 @@ public static class SmlPackageReader
 
         if (Encoding.UTF8.GetString(ReadBytes(stream, 4)) != Magic)
         {
-            stream.Close();
             return null;
         }
 
@@ -66,15 +66,27 @@ public static class SmlPackageReader
         ReadChunkTable(stream, file);
         ReadChunkTable(stream, file);
 
+        if (stream.Position > int.MaxValue)
+        {
+            throw InvalidPackage(stream, "the chunk tables are too large");
+        }
+
         file.FileOffset = (int)stream.Position;
+        ValidateChunkRanges(stream, file);
 
         if (file.Files.Count > 0)
         {
             FileChunk last = file.Files[^1];
-            ReadBytes(stream, last.offset + last.length);
+            long skip = (long)last.offset + last.length;
+            if (skip > int.MaxValue)
+            {
+                throw InvalidPackage(stream, "the last chunk is too large");
+            }
+
+            ReadBytes(stream, (int)skip);
         }
 
-        int assemblyLength = BitConverter.ToInt32(ReadBytes(stream, 4), 0);
+        int assemblyLength = ReadInt32(stream, "assembly length");
         file.Assembly = ModAssemblyLoadContext.Instance.LoadMod(ReadBytes(stream, assemblyLength));
         file.Path = path;
 
@@ -87,38 +99,88 @@ public static class SmlPackageReader
             Log.Information("Cannot find the icon.png associated to {0}", Path.GetFileName(path));
         }
 
-        stream.Close();
         file.Stream = null;
         return file;
     }
 
     private static void ReadChunkTable(FileStream stream, ModFile file)
     {
-        int count = BitConverter.ToInt32(ReadBytes(stream, 4), 0);
+        int count = ReadInt32(stream, "chunk count");
+        if (count < 0 || count > MaxChunksPerTable)
+        {
+            throw InvalidPackage(stream, $"invalid chunk count {count}");
+        }
+
         for (int i = 0; i < count; i++)
         {
-            int nameLength = BitConverter.ToInt32(ReadBytes(stream, 4), 0);
-            FileChunk chunk = new()
+            int nameLength = ReadInt32(stream, "chunk name length");
+            if (nameLength < 0 || nameLength > MaxChunkNameLength)
             {
-                name = Encoding.UTF8.GetString(ReadBytes(stream, nameLength)),
-                offset = BitConverter.ToInt32(ReadBytes(stream, 4), 0),
-                length = BitConverter.ToInt32(ReadBytes(stream, 4), 0),
-            };
-            file.Files.Add(chunk);
+                throw InvalidPackage(stream, $"invalid chunk name length {nameLength}");
+            }
+
+            string name = Encoding.UTF8.GetString(ReadBytes(stream, nameLength));
+            int offset = ReadInt32(stream, "chunk offset");
+            int length = ReadInt32(stream, "chunk length");
+            if (offset < 0 || length < 0)
+            {
+                throw InvalidPackage(stream, $"invalid chunk range offset={offset} length={length}");
+            }
+
+            file.Files.Add(new FileChunk
+            {
+                name = name,
+                offset = offset,
+                length = length,
+            });
         }
     }
 
+    /// <summary>Every chunk must fit inside the payload area that follows the tables.</summary>
+    private static void ValidateChunkRanges(FileStream stream, ModFile file)
+    {
+        long payloadLength = stream.Length - file.FileOffset;
+        foreach (FileChunk chunk in file.Files)
+        {
+            if ((long)chunk.offset + chunk.length > payloadLength)
+            {
+                throw InvalidPackage(
+                    stream,
+                    $"chunk '{chunk.name}' points outside the payload (offset={chunk.offset}, length={chunk.length})");
+            }
+        }
+    }
+
+    private static int ReadInt32(FileStream stream, string field)
+    {
+        byte[] bytes = ReadBytes(stream, 4);
+        return BitConverter.ToInt32(bytes, 0);
+    }
+
+    /// <summary>
+    /// Reads exactly <paramref name="length"/> bytes. Short reads (network shares, a file that is
+    /// still being copied, truncated packages) throw instead of silently zero-padding the buffer.
+    /// The helper never closes the stream; the caller owns its lifetime.
+    /// </summary>
     internal static byte[] ReadBytes(FileStream stream, int length)
     {
-        byte[] bytes = new byte[length];
-        if (stream.Length - stream.Position < length)
+        if (length < 0)
         {
-            stream.Close();
-            throw new IOException(
-                $"In SmlPackageReader.ReadBytes cannot read {length} bytes in the mod {Path.GetFileName(stream.Name)}");
+            throw InvalidPackage(stream, $"negative read length {length}");
         }
 
-        stream.Read(bytes, 0, length);
+        long remaining = stream.Length - stream.Position;
+        if (remaining < length)
+        {
+            throw new EndOfStreamException(
+                $"In SmlPackageReader.ReadBytes cannot read {length} bytes in the mod {Path.GetFileName(stream.Name)} (remaining {remaining})");
+        }
+
+        byte[] bytes = new byte[length];
+        stream.ReadExactly(bytes, 0, length);
         return bytes;
     }
+
+    private static InvalidDataException InvalidPackage(FileStream stream, string detail) =>
+        new($"Invalid .sml package '{Path.GetFileName(stream.Name)}': {detail}.");
 }

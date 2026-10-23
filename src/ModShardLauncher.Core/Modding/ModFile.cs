@@ -72,19 +72,32 @@ public class ModFile
             throw new FileNotFoundException($"File {fileName} not found in the packed sml.");
         }
 
-        FileStream stream = Stream ??= new FileStream(Path, FileMode.Open);
+        FileStream stream = Stream ??= new FileStream(Path, FileMode.Open, FileAccess.Read, FileShare.Read);
         if (!stream.CanRead)
         {
-            stream = new FileStream(Path, FileMode.Open);
+            stream = new FileStream(Path, FileMode.Open, FileAccess.Read, FileShare.Read);
             Stream = stream;
         }
 
-        stream.Position = FileOffset;
-        SmlPackageReader.ReadBytes(stream, file.offset);
-        byte[] payload = SmlPackageReader.ReadBytes(stream, file.length);
-        Stream.Close();
-        Stream = null;
-        return payload;
+        try
+        {
+            long position = (long)FileOffset + file.offset;
+            if (position < 0 || position > stream.Length)
+            {
+                throw new InvalidDataException($"File {fileName} points outside the packed sml.");
+            }
+
+            stream.Position = position;
+            return SmlPackageReader.ReadBytes(stream, file.length);
+        }
+        finally
+        {
+            stream.Close();
+            if (ReferenceEquals(Stream, stream))
+            {
+                Stream = null;
+            }
+        }
     }
 
     public string GetCode(string fileName)

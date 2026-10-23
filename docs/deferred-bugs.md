@@ -1,6 +1,6 @@
 # 迁移期暂缓修复的历史缺陷
 
-本次重构以**功能对等迁移**为第一目标。下列问题来自重构前分析报告第 5.1 节，除特别说明外均**按原样保留**，留待后续单独修复。
+下列问题来自重构前分析报告第 5.1 节，当前状态见最后一列；已修复项均补充了回归测试。
 
 | 编号 | 位置（新代码） | 问题 | 当前状态 |
 |---|---|---|---|
@@ -11,7 +11,7 @@
 | B5 | `PatchRunner.ApplyMods` | 每次打补丁都向 `Main.Settings.EnabledMods` 追加模组名，从不去重；禁用状态也不会同步，导致重启后旧模组被重新启用。 | **已修复并回归**：补丁过程不再写设置；保存设置（关闭窗口、切换语言/日志等）时用 `ModCatalog.GetEnabledModNames` 生成当前勾选状态的去重快照，启动时 `ApplyEnabledMods` 同样去重。新增 `EnabledModsTests`。 |
 | B6 | `GameDataService.LoadCore` | 每次加载 `data.win` 都调用 `data.Export(DataType.Items)`，删除并重建工作目录下的 `export/`。 | **已修复并回归**：改为设置项 `ExportManifests`（默认关闭）。仅当用户开启时，加载成功后才导出；CLI 的 `export` 命令仍可显式导出。新增 `ManifestExportSettingsTests`。 |
 | B7 | — | 旧版 `Main.Refresh()` 把控件从旧 `ContentControl` 重挂到新控件，可能抛“元素已有父级”。 | **不适用**：MVVM 导航不再重挂可视元素。 |
-| B8 | `SmlPackageReader.ReadBytes` | 使用 `Stream.Read` 且不校验返回值，存在短读可能；失败时在读取函数内部关闭流。 | **原样保留**。 |
+| B8 | `SmlPackageReader.ReadBytes` | 使用 `Stream.Read` 且不校验返回值，存在短读可能；失败时在读取函数内部关闭流。 | **已修复并回归**：改用 `ReadExactly`，短读抛 `EndOfStreamException`；负长度、异常 chunk 数量/名称长度、越界 chunk 抛 `InvalidDataException`；helper 不再关闭流，`ModFile.GetFile` 用 `finally` 统一关闭并校验偏移。新增 `SmlPackageReaderTests`（截断头、负 chunk 数、越界 chunk、魔数不匹配）。 |
 | B9 | `ModCatalog.Reload` | 仅对 `.sml` 读取做 try/catch；`GetTypes()`/`Activator.CreateInstance` 异常会中断整批加载。 | **原样保留**。 |
 | B10 | `ModInterfaceServer.Stop` | 旧版关闭窗口时直接 `Server.Close()`，可能 NRE。 | 为满足 nullable 编译做了**空安全最小加固**，行为不变。 |
 

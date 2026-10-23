@@ -144,9 +144,8 @@ ModShardLauncher.CLI.exe compile --source .\ModSources\MyMod
 
 ## 已知问题
 
-分析报告 5.1 节列出的历史缺陷大部分已修复并有回归测试（B1、B2、B4、B5、B6）；B3 在 Windows-only 目标下不适用。仍保留（详见 [`docs/deferred-bugs.md`](docs/deferred-bugs.md)）：
+分析报告 5.1 节列出的历史缺陷大部分已修复并有回归测试（B1、B2、B4、B5、B6、B8）；B3 在 Windows-only 目标下不适用。仍保留（详见 [`docs/deferred-bugs.md`](docs/deferred-bugs.md)）：
 
-- `.sml` 读取时可能出现的短读（B8）；
 - 单个模组加载异常可能中断整批扫描（B9）。
 
 此外，`UndertaleModTool` 的二进制依赖仍按原样冻结；其 `Magick.NET` 传递依赖未随发布输出，若走到需要 ImageMagick 的代码路径可能失败，后续单独处理。
