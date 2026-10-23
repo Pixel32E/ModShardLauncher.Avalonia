@@ -226,8 +226,7 @@ ModSourcesView → ModSourceItemViewModel.CompileCommand
 
 ## 11. 后续工作
 
-1. 修复 `docs/deferred-bugs.md` 中的历史缺陷。
-2. 为 `.sml` 读取、图集布局、补丁管线补集成测试（当前主要覆盖匹配管线与本地化）。
-3. 视需要把 `MslTextures`/`MslRooms`/`LootTables` 等大文件继续按类型拆分。
-4. 评估用 `AssemblyLoadContext` 隔离并卸载模组程序集。
-5. 增加 Windows 之外的构建矩阵（CLI 模式与测试可在 Linux 运行）。
+1. 为图集布局、补丁管线补集成测试（`.sml` 读取与本地化已有回归测试）。
+2. 视需要把 `MslTextures`/`MslRooms`/`LootTables` 等大文件继续按类型拆分。
+3. 评估用 `AssemblyLoadContext` 隔离并卸载模组程序集。
+4. 增加 Windows 之外的构建矩阵（CLI 模式与测试可在 Linux 运行）。
