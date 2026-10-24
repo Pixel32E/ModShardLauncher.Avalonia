@@ -465,6 +465,9 @@ v0.13.2.0 之前的版本里，武器表 API 与游戏当前的 84 列结构不�
 | 7 | 官方文档要求把 `ModShard.dll` 放进游戏目录、用 `give` 命令 | 本仓库不随附这个游戏侧插件，也没有注入对应的控制台 GML；菜单里的「脚本控制台」只是本地 socket 服务（端口 1333），需要配套插件才有意义 | 调试用日志（§11）；取武器走掉落表/商人 |
 | 8 | 打补丁时警告 `built with msl ... different from ...` | `.sml` 的构建版本和当前启动器不同 | 只是警告，可以继续；要消掉就重编译 |
 | 9 | 打开 `data.win` 报 YYC | 游戏用了 YoYo 编译器，数据不可改 | 换 `modbranch` 或非 YYC 版本 |
+| 10 | 用原版 MSL（net6.0）打包时报 `System.Linq, Version=10.0.0.0` 找不到，堆栈停在 `PatchMod()` | mod 源码用了 LINQ（如 `.Any(...)`），打包器按当前 .NET 10 环境引用 `System.Linq`，net6 启动器加载时找不到 | 不依赖 LINQ（改 `foreach`），并在 csproj 关闭 `ImplicitUsings`，只用 netstandard 基础 API |
+| 11 | 打补丁时报 `Assembly with same name is already loaded` | `Mods` 目录里有多个程序集名相同的 `.sml`（例如 `Map_TP.sml` 与 `Map_TP-v0.3.0.0.sml`） | 只保留一份 `.sml`，旧包改成 `.sml.bak` 或移出 `Mods` |
+| 12 | 同一个 `.sml` 在两个启动器之间表现不一致 | Avalonia 版是 net10，打的包引用 `System.Private.CoreLib 10`；原版 MSL 是 net6 | 用哪个启动器进游戏，就用哪个启动器打包 |
 
 ## 11. 验证与调试
 
